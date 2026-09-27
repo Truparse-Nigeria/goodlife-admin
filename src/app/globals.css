@@ -1,26 +1,144 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens — the only place raw values live.
+ * Source: Claude Design "Loan Portal" (visual spec only).
+ * The default Tailwind palette is cleared so components can only use these.
+ */
+@theme {
+  --color-*: initial;
+
+  /* Text */
+  --color-ink: #10292a;
+  --color-ink-soft: #3e5354;
+  --color-muted: #5b6f70;
+  --color-subtle: #8a9a9b;
+  --color-faint: #c9d3d3;
+
+  /* Surfaces */
+  --color-canvas: #f5f7f7;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f8fafa;
+  --color-track: #eef3f3;
+  --color-neutral-chip: #f0f3f3;
+
+  /* Lines */
+  --color-border: #e3e9e9;
+  --color-border-input: #d6dfdf;
+  --color-divider: #eef2f2;
+
+  /* Brand */
+  --color-brand-deep: #0e3b3c;
+  --color-brand-strong: #0b6e6f;
+  --color-brand: #17a3a3;
+  --color-brand-hover: #0e8c8d;
+  --color-brand-soft: #e1f3f3;
+  --color-brand-soft-hover: #cbebeb;
+  --color-on-brand: #ffffff;
+  --color-on-ink: #ffffff;
+
+  /* Accent (nav count badge, toast dot) */
+  --color-accent: #f4e53c;
+  --color-on-accent: #3d3500;
+
+  /* Status: warning / pending */
+  --color-warning-soft: #fdf6c8;
+  --color-warning: #6e5f00;
+  --color-warning-dot: #e0cf1f;
+
+  /* Status: danger / overdue */
+  --color-danger-soft: #fbeae8;
+  --color-danger: #a8342c;
+  --color-danger-border: #e8c4c0;
+  --color-danger-tint: #fff8f7;
+
+  /* Status: success / paid */
+  --color-success-soft: #e6f2ea;
+  --color-success: #2b6e45;
+
+  /* Status: neutral / rejected */
+  --color-neutral-soft: #eef0f0;
+  --color-neutral: #4f5e5f;
+
+  /* Typography — sizes in px from the spec; line-height inherits (normal) */
+  --text-10: 10px;
+  --text-11: 11px;
+  --text-12: 12px;
+  --text-13: 13px;
+  --text-14: 14px;
+  --text-15: 15px;
+  --text-16: 16px;
+  --text-18: 18px;
+  --text-19: 19px;
+  --text-20: 20px;
+  --text-22: 22px;
+  --text-24: 24px;
+  --text-26: 26px;
+  --tracking-overline: 0.08em;
+  --tracking-stat: -0.01em;
+
+  /* Radii */
+  --radius-sm: 8px; /* small buttons, file tiles */
+  --radius-segment: 9px; /* segmented-control item */
+  --radius-md: 10px; /* inputs, buttons, toast */
+  --radius-lg: 12px; /* segmented track, sidebar logo tile */
+  --radius-xl: 14px; /* cards */
+  --radius-2xl: 18px; /* login card */
+
+  /* Shadows */
+  --shadow-elevated: 0 24px 60px -36px rgb(16 41 42 / 0.45);
+  --shadow-toast: 0 12px 30px -12px rgb(16 41 42 / 0.5);
+  --shadow-segment: 0 1px 3px rgb(16 41 42 / 0.12);
+
+  /* Layout widths (usable as w-* / max-w-*) */
+  --container-sidebar: 248px;
+  --container-page: 1200px;
+  --container-form: 760px;
+  --container-auth: 420px;
+}
+
+/*
+ * Table layouts: grid-template-columns + the width below which each table
+ * scrolls horizontally. Referenced by <Table layout="…">.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --table-loans-cols: 90px minmax(170px, 1.4fr) 90px 120px 70px 110px minmax(130px, 1fr) 100px;
+  --table-loans-min: 920px;
+  --table-loans-compact-cols: 90px 90px 120px 110px minmax(130px, 1fr) 100px;
+  --table-loans-compact-min: 640px;
+  --table-tracker-cols: 90px minmax(140px, 1.3fr) minmax(150px, 1fr) 120px 110px 100px;
+  --table-tracker-min: 760px;
+  --table-schedule-cols: 40px 110px 1fr 1fr 1fr 130px 120px;
+  --table-schedule-min: 720px;
+  --table-schedule-preview-cols: 40px 120px 1fr 1fr 1fr;
+  --table-schedule-preview-min: 560px;
+  --table-users-cols: minmax(240px, 2fr) 140px 90px 90px 130px 110px;
+  --table-users-min: 780px;
 }
 
+/* Responsive tile grid; tile minimum comes from --auto-min (see <AutoGrid>). */
+@utility grid-cols-auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(var(--auto-min), 1fr));
+}
+
+/* Font comes from next/font (see app/layout.tsx) */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+    line-height: normal;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  a {
+    @apply text-brand-strong no-underline hover:text-ink hover:underline;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply outline-2 -outline-offset-1 outline-brand;
+  }
 }
