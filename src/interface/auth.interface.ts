@@ -13,6 +13,18 @@ export interface IChangePassword {
   newPassword: string;
 }
 
+/** Body for POST /auth/forgot-password. `app: "admin"` makes the emailed link open this portal. */
+export interface IForgotPassword {
+  email: string;
+  app: "admin";
+}
+
+/** Body for POST /auth/reset-password; `token` comes from the emailed link. */
+export interface IResetPassword {
+  token: string;
+  password: string;
+}
+
 /**
  * POST /auth/login → 201. `user` is top-level (not under `data`). The token is
  * only in the httpOnly `token` Set-Cookie, never the body (see `loginApi`).

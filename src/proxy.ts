@@ -4,10 +4,13 @@ import { canAccessPath, homeFor, SESSION_COOKIE, verifySession } from "@/lib/ses
 /**
  * Route by session + role:
  * - signed out → /login (a stale cookie is cleared)
- * - signed in on /login or / → the role's home
+ * - signed in on /login, the password reset pages or / → the role's home
  * - admins stay out of customer routes, customers out of admin routes;
  *   super admins can open anything
  */
+/** Pages for signed-out users; a signed-in user is sent to their home instead. */
+const AUTH_PATHS = ["/login", "/forgot-password", "/reset-password"];
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const cookie = request.cookies.get(SESSION_COOKIE)?.value;
@@ -15,7 +18,7 @@ export async function proxy(request: NextRequest) {
   const redirectTo = (path: string) => NextResponse.redirect(new URL(path, request.url));
 
   if (!session) {
-    if (pathname === "/login") return NextResponse.next();
+    if (AUTH_PATHS.includes(pathname)) return NextResponse.next();
     const response = redirectTo("/login");
     if (cookie) response.cookies.delete(SESSION_COOKIE);
     return response;
@@ -24,7 +27,7 @@ export async function proxy(request: NextRequest) {
   if (pathname === "/logout") return NextResponse.next();
 
   const { role } = session.user;
-  if (pathname === "/login" || pathname === "/") return redirectTo(homeFor(role));
+  if (AUTH_PATHS.includes(pathname) || pathname === "/") return redirectTo(homeFor(role));
   if (!canAccessPath(role, pathname)) return redirectTo(homeFor(role));
   return NextResponse.next();
 }

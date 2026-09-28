@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { changePasswordApi, loginApi, logoutApi } from "@/api/auth";
+import { changePasswordApi, forgotPasswordApi, loginApi, logoutApi, resetPasswordApi } from "@/api/auth";
 import {
   createPasswordChangeSession,
   createSession,
@@ -75,6 +75,39 @@ export async function changeTemporaryPassword(
 
   await deletePasswordChangeSession();
   return { done: true };
+}
+
+export type ForgotPasswordState = { error: string; email: string } | { sent: true; email: string } | null;
+
+/** Email a reset link that opens /reset-password in this portal. */
+export async function requestPasswordReset(
+  _prev: ForgotPasswordState,
+  formData: FormData,
+): Promise<ForgotPasswordState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!email) return { error: "Enter your email address.", email };
+
+  const { error } = await forgotPasswordApi(email);
+  if (error) return { error: error.message, email };
+  return { sent: true, email };
+}
+
+export type ResetPasswordState = { error: string } | null;
+
+/** Set a new password from the emailed link, then send the user to sign in with it. */
+export async function resetPassword(_prev: ResetPasswordState, formData: FormData): Promise<ResetPasswordState> {
+  const token = String(formData.get("token") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (!token) return { error: "This reset link is invalid. Request a new one." };
+  if (password.length < MIN_PASSWORD_LENGTH) return { error: `Use at least ${MIN_PASSWORD_LENGTH} characters.` };
+  if (password !== confirmPassword) return { error: "The passwords don’t match." };
+
+  const { error } = await resetPasswordApi({ token, password });
+  if (error) return { error: error.message };
+
+  redirect("/login?reset=1");
 }
 
 export async function signOut(): Promise<void> {

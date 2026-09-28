@@ -1,4 +1,10 @@
-import type { IChangePassword, ILoginForm, ILoginResponse } from "@/interface/auth.interface";
+import type {
+  IChangePassword,
+  IForgotPassword,
+  ILoginForm,
+  ILoginResponse,
+  IResetPassword,
+} from "@/interface/auth.interface";
 import type { IResponse } from "@/types/api";
 import { authHeader, callApi, HttpMethod } from "./client";
 
@@ -44,5 +50,19 @@ export const changePasswordApi = async (token: string, body: IChangePassword) =>
 export const logoutApi = async (token: string) => {
   return await callApi<never, never, IResponse<never>>("/auth/logout", HttpMethod.POST, {
     headers: authHeader(token),
+  });
+};
+
+/** Email a reset link. The API answers the same whether or not the account exists. */
+export const forgotPasswordApi = async (email: string) => {
+  return await callApi<IForgotPassword, never, IResponse<never>>("/auth/forgot-password", HttpMethod.POST, {
+    data: { email, app: "admin" },
+  });
+};
+
+/** Set a new password with the emailed token. The API revokes every token for the user. */
+export const resetPasswordApi = async (body: IResetPassword) => {
+  return await callApi<IResetPassword, never, IResponse<never>>("/auth/reset-password", HttpMethod.POST, {
+    data: body,
   });
 };

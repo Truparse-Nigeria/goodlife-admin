@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getAllLoansApi } from "@/api/loan";
+import { ExportLoansButton } from "@/components/loan/ExportLoansButton";
 import { LoanStatusFilters } from "@/components/loan/LoanStatusFilters";
 import { LoanTable } from "@/components/loan/LoanTable";
-import { buttonClasses } from "@/components/ui/Button";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -37,10 +37,7 @@ export default async function LoansPage({ searchParams }: PageProps<"/loans">) {
         subtitle="Review, approve and track every loan."
         actions={
           <div className="flex gap-2.5">
-            {/* A plain link: the route streams a file, so no client navigation or prefetch. */}
-            <a href={loanExportHref(params)} className={buttonClasses({ variant: "secondary" }, "font-semibold")}>
-              Export XLSX
-            </a>
+            <ExportLoansButton href={loanExportHref(params)} />
             <ButtonLink href="/loans/new">Create loan</ButtonLink>
           </div>
         }

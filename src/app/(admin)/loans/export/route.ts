@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
   const params = parseLoanListParams(Object.fromEntries(request.nextUrl.searchParams));
 
   const res = await exportLoansApi(token, { status: params.status, search: params.query || undefined });
-  if (res.status === 401) return NextResponse.redirect(new URL("/logout", request.url));
+  // Fetched by ExportLoansButton, so reply with a message rather than a redirect.
+  if (res.status === 401) return new NextResponse("Your session has expired. Sign in again.", { status: 401 });
   if (!res.ok || !res.body) {
     const body = (await res.json().catch(() => null)) as { message?: string } | null;
     return new NextResponse(`Couldn’t export loans: ${body?.message ?? res.statusText}`, { status: res.status || 502 });

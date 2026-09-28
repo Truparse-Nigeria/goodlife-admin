@@ -14,7 +14,7 @@ export enum HttpMethod {
 const PASSWORD_CHANGE_PATH = "/change-password";
 
 /** 401s from these endpoints are wrong credentials, not an expired session. */
-const AUTH_ENDPOINTS = ["/auth/login"];
+const AUTH_ENDPOINTS = ["/auth/login", "/auth/forgot-password", "/auth/reset-password"];
 
 /** goodlife-api base URL, including the /api/v1 prefix. */
 export const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://api.goodlifecreditng.com/api/v1";
