@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { getAllLoansApi } from "@/api/loan";
 import { LoanStatusFilters } from "@/components/loan/LoanStatusFilters";
 import { LoanTable } from "@/components/loan/LoanTable";
+import { buttonClasses } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { TableEmpty } from "@/components/ui/TableEmpty";
-import { loanListHref, parseLoanListParams } from "@/lib/loan-list-params";
+import { loanExportHref, loanListHref, parseLoanListParams } from "@/lib/loan-list-params";
 import { rowFromApiLoan } from "@/lib/loan-rows";
 import { redirectIfUnauthorized, requireAdmin } from "@/lib/session";
 
@@ -30,7 +32,19 @@ export default async function LoansPage({ searchParams }: PageProps<"/loans">) {
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Loan applications" subtitle="Review, approve and track every loan." />
+      <PageHeader
+        title="Loan applications"
+        subtitle="Review, approve and track every loan."
+        actions={
+          <div className="flex gap-2.5">
+            {/* A plain link: the route streams a file, so no client navigation or prefetch. */}
+            <a href={loanExportHref(params)} className={buttonClasses({ variant: "secondary" }, "font-semibold")}>
+              Export XLSX
+            </a>
+            <ButtonLink href="/loans/new">Create loan</ButtonLink>
+          </div>
+        }
+      />
       <div className="flex flex-wrap items-center justify-between gap-3">
         {meta && <LoanStatusFilters params={params} counts={meta.statusCounts} />}
         <SearchInput defaultValue={params.query} placeholder="Search by name or email" />

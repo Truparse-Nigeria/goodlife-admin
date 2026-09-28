@@ -16,10 +16,11 @@ const PASSWORD_CHANGE_PATH = "/change-password";
 /** 401s from these endpoints are wrong credentials, not an expired session. */
 const AUTH_ENDPOINTS = ["/auth/login"];
 
-const DEFAULT_BASE_URL = "https://api.goodlifecreditng.com/api/v1";
+/** goodlife-api base URL, including the /api/v1 prefix. */
+export const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://api.goodlifecreditng.com/api/v1";
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL ?? DEFAULT_BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 1000 * 60,
   // goodlife-api authenticates with an httpOnly `token` cookie.
   withCredentials: true,

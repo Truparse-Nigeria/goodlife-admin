@@ -205,3 +205,62 @@ export interface IUpdateLoanStatus {
   status: ApiLoanStatus;
   interestPerMonth?: number;
 }
+
+/* ---------- Admin: create a loan for a customer (POST /admin/loans) ---------- */
+
+export type EmploymentStatus = "Employed" | "Unemployed" | "Self-employed" | "Student" | "Retired";
+
+/** Same body as the website's first application (goodlife-api firstTimeLoanSchema). */
+export interface ICreateLoan {
+  user: {
+    title: Title;
+    firstName: string;
+    lastName: string;
+    gender: Gender;
+    /** YYYY-MM-DD */
+    dob: string;
+    phoneNumber: string;
+    email: string;
+    address: IAddress;
+    nextOfKin: INextOfKin;
+    employerName: string;
+    nin: string;
+    bvn: string;
+    bankDetails: { bankName: string; accountNumber: string };
+    id_url: string;
+    signature: string;
+  };
+  loan: {
+    type: ApiLoanType;
+    amount: number;
+    /** "1"–"12" */
+    durationInMonths: string;
+    purpose: string;
+    otherPurpose?: string;
+    sourceOfRepayment: string;
+    otherSourceOfRepayment?: string;
+    workingStatus: EmploymentStatus;
+    monthlyIncome: number;
+    positionOfUserInBusiness?: string;
+    guarantorForm1: string;
+    guarantorForm2: string;
+    statementOfAccount: string;
+    utilityBill: string;
+  };
+  business?: {
+    businessName: string;
+    CAC: string;
+    industry: string;
+    address: IAddress;
+    memartURL: string;
+    certificateURL: string;
+    statusReportURL: string;
+  };
+}
+
+export interface ICreateLoanResult {
+  loanId: string;
+  userId: string;
+  /** True when the loan was added to an existing customer's account. */
+  existingCustomer: boolean;
+}

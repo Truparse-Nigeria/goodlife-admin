@@ -28,3 +28,12 @@ export function loanListHref(current: LoanListParams, change: Partial<LoanListPa
   const s = qs.toString();
   return s ? `/loans?${s}` : "/loans";
 }
+
+/** Download link for the list as it's currently filtered (every page, not just this one). */
+export function loanExportHref({ status, query }: LoanListParams): string {
+  const qs = new URLSearchParams();
+  if (status) qs.set("status", status.toLowerCase());
+  if (query) qs.set("q", query);
+  const s = qs.toString();
+  return s ? `/loans/export?${s}` : "/loans/export";
+}

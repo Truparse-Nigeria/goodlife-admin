@@ -1,4 +1,6 @@
 import type {
+  ICreateLoan,
+  ICreateLoanResult,
   IGetLoansParams,
   IInstallment,
   ILoanDetail,
@@ -10,7 +12,7 @@ import type {
   IUpdateLoanStatus,
 } from "@/interface/loan.interface";
 import type { IPaginationMeta, IResponse } from "@/types/api";
-import { authHeader, callApi, HttpMethod } from "./client";
+import { API_BASE_URL, authHeader, callApi, HttpMethod } from "./client";
 
 /** Admin: paginated loans with per-status counts. `token` is the session's API token. */
 export const getAllLoansApi = async (token: string, params: IGetLoansParams = {}) => {
@@ -84,4 +86,32 @@ export const deletePaymentApi = async (token: string, loanId: string, number: nu
     HttpMethod.DELETE,
     { headers: authHeader(token) },
   );
+};
+
+/** Admin: apply for a loan on a customer's behalf (new or existing account). */
+export const createLoanApi = async (token: string, body: ICreateLoan) => {
+  return await callApi<ICreateLoan, ICreateLoanResult>("/admin/loans", HttpMethod.POST, {
+    data: body,
+    headers: authHeader(token),
+  });
+};
+
+/**
+ * Admin: every loan matching the list's filters as an .xlsx file.
+ * A raw fetch, not callApi: the body is a file, not the JSON envelope.
+ */
+export const exportLoansApi = async (token: string, params: Omit<IGetLoansParams, "page" | "limit">) => {
+  const url = new URL(`${API_BASE_URL}/admin/loans/export`);
+  for (const [key, value] of Object.entries(params)) if (value) url.searchParams.set(key, String(value));
+  return fetch(url, { headers: authHeader(token), cache: "no-store" });
+};
+
+/** Public: NIGERIAN_STATES, for address pickers. */
+export const getStatesApi = async () => {
+  return await callApi<never, string[]>("/loan/states", HttpMethod.GET);
+};
+
+/** Public: industries a business can be in. */
+export const getIndustriesApi = async () => {
+  return await callApi<never, string[]>("/loan/industries", HttpMethod.GET);
 };
