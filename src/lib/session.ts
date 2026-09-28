@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import type { UserRole } from "@/interface/user.interface";
 import type { ApiError } from "@/types/api";
 import type { SessionPayload, SessionUser } from "@/types/session";
-import { homeFor, SESSION_COOKIE, SESSION_TTL_MS, signSession, verifySession } from "./session-token";
+import { homeFor, isSuperAdmin, SESSION_COOKIE, SESSION_TTL_MS, signSession, verifySession } from "./session-token";
 
 /*
  * App session: a signed, httpOnly cookie holding the goodlife-api token and
@@ -15,11 +15,14 @@ export async function getSession(): Promise<SessionPayload | null> {
   return verifySession((await cookies()).get(SESSION_COOKIE)?.value);
 }
 
-/** For pages and actions: signed-out → /login, wrong role → that role's home. */
+/**
+ * For pages and actions: signed-out → /login, wrong role → that role's home.
+ * Super admins pass every role check.
+ */
 export async function requireRole(role: UserRole): Promise<SessionPayload> {
   const session = await getSession();
   if (!session) redirect("/login");
-  if (session.user.role !== role) redirect(homeFor(session.user.role));
+  if (session.user.role !== role && !isSuperAdmin(session.user.role)) redirect(homeFor(session.user.role));
   return session;
 }
 

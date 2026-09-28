@@ -12,7 +12,7 @@ import { TeamMemberActions } from "./TeamMemberActions";
 
 export type TeamTableProps = {
   members: ITeamMember[];
-  /** The signed-in admin, who can't remove themselves. */
+  /** The signed-in admin, who can't remove themselves. Super admins can't be removed at all. */
   currentUserId: string;
   resendAction: TeamMemberAction;
   removeAction: TeamMemberAction;
@@ -45,6 +45,8 @@ export function TeamTable({ members, currentUserId, resendAction, removeAction }
             </div>
             {member.id === currentUserId ? (
               <div className="text-right text-13 text-muted">You</div>
+            ) : member.role === "Super Admin" ? (
+              <div />
             ) : (
               <TeamMemberActions
                 id={member.id}

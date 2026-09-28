@@ -13,7 +13,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
         <Sidebar
           portalLabel="Admin portal"
           items={adminNav}
-          user={{ name: `${user.firstName} ${user.lastName}`, role: "Admin" }}
+          user={{ name: `${user.firstName} ${user.lastName}`, role: user.role }}
           signOutAction={signOut}
         />
       }

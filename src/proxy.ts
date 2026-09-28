@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { homeFor, isCustomerPath, SESSION_COOKIE, verifySession } from "@/lib/session-token";
+import { canAccessPath, homeFor, SESSION_COOKIE, verifySession } from "@/lib/session-token";
 
 /**
  * Route by session + role:
  * - signed out → /login (a stale cookie is cleared)
  * - signed in on /login or / → the role's home
- * - admins stay out of customer routes, customers out of admin routes
+ * - admins stay out of customer routes, customers out of admin routes;
+ *   super admins can open anything
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -24,8 +25,7 @@ export async function proxy(request: NextRequest) {
 
   const { role } = session.user;
   if (pathname === "/login" || pathname === "/") return redirectTo(homeFor(role));
-  const allowed = role === "Admin" ? !isCustomerPath(pathname) : isCustomerPath(pathname);
-  if (!allowed) return redirectTo(homeFor(role));
+  if (!canAccessPath(role, pathname)) return redirectTo(homeFor(role));
   return NextResponse.next();
 }
 

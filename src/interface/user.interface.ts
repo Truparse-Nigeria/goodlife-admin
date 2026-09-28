@@ -3,7 +3,8 @@
  * Dates arrive as ISO strings. `password` and `__v` are stripped by the API.
  */
 
-export type UserRole = "Admin" | "User";
+/** "Super Admin" can access everything, admin and customer views alike. */
+export type UserRole = "Super Admin" | "Admin" | "User";
 export type Title = "Mr" | "Mrs" | "Ms" | "Dr" | "Miss";
 export type Gender = "Male" | "Female" | "Other";
 export type NextOfKinRelationship = "Spouse" | "Parent" | "Sibling" | "Friend" | "Colleague" | "Other";

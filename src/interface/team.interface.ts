@@ -10,7 +10,8 @@ export interface ITeamMember {
   firstName: string;
   lastName: string;
   email: string;
-  role: "Admin";
+  /** Super admins are granted on the server, never invited, and can't be removed here. */
+  role: "Admin" | "Super Admin";
   status: TeamMemberStatus;
   /** ISO timestamp of the (latest) invite. */
   invitedAt: string | null;

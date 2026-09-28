@@ -16,8 +16,19 @@ export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 /** Route prefixes that belong to the customer view; everything else is admin. */
 export const CUSTOMER_PATHS = ["/my-loans"];
 
+export const isSuperAdmin = (role: UserRole) => role === "Super Admin";
+
+/** Admins and super admins use the admin view. */
+export const isAdminRole = (role: UserRole) => role === "Admin" || isSuperAdmin(role);
+
 export function homeFor(role: UserRole): string {
-  return role === "Admin" ? "/dashboard" : "/my-loans";
+  return isAdminRole(role) ? "/dashboard" : "/my-loans";
+}
+
+/** Super admins can open any route; everyone else only their own view's. */
+export function canAccessPath(role: UserRole, pathname: string): boolean {
+  if (isSuperAdmin(role)) return true;
+  return isAdminRole(role) ? !isCustomerPath(pathname) : isCustomerPath(pathname);
 }
 
 export function isCustomerPath(pathname: string): boolean {
