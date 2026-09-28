@@ -1,14 +1,15 @@
 import type { ISODate } from "./common";
-import type { LoanSummary } from "./repayment";
-import type { Customer } from "./user";
 
 export type LoanType = "personal" | "business";
 
 /** Stored lifecycle status. */
 export type LoanStatus = "pending" | "active" | "completed" | "rejected";
 
-/** What the UI shows: an active loan with a missed installment reads as overdue. */
-export type DisplayStatus = LoanStatus | "overdue";
+/**
+ * What the UI shows. Mock loans: an active loan with a missed installment reads
+ * as overdue. goodlife-api adds approved (not yet disbursed) and defaulted.
+ */
+export type DisplayStatus = LoanStatus | "overdue" | "approved" | "defaulted";
 
 export interface Business {
   name: string;
@@ -52,10 +53,16 @@ export interface Loan {
   businessDocuments: BusinessDocuments | null;
 }
 
-/** A loan joined with its borrower and derived repayment position, ready to render. */
-export interface LoanView {
-  loan: Loan;
-  customer: Customer;
-  summary: LoanSummary;
+/** One row of a loan table, independent of where the loan came from. */
+export interface LoanRow {
+  id: string;
+  href: string;
+  applicantName: string;
+  type: string;
+  amount: number;
+  tenureMonths: number;
+  appliedAt: ISODate;
   status: DisplayStatus;
+  /** Null when there is no repayment data to show. */
+  progress: { label: string; percent: number } | null;
 }

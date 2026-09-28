@@ -3,6 +3,7 @@ export interface IPaginationMeta {
   total: number;
   page: number;
   limit: number;
+  totalPages?: number;
 }
 
 /**
@@ -10,11 +11,11 @@ export interface IPaginationMeta {
  * Success: `{ success: true, message?, data?, meta? }`
  * Failure: `{ success: false, message, data?, responseCode?, error? }`
  */
-export interface IResponse<T> {
+export interface IResponse<T, TMeta = IPaginationMeta> {
   success: boolean;
   message?: string;
   data?: T;
-  meta?: IPaginationMeta;
+  meta?: TMeta;
   /** HTTP status echoed by the API's error handler. */
   responseCode?: number;
   /** Machine-readable error code, e.g. "PasswordChangeRequired". */

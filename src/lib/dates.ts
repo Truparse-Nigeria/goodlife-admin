@@ -37,3 +37,8 @@ export function greeting(now: Date = new Date()): string {
   if (hour < 17) return "Good afternoon";
   return "Good evening";
 }
+
+/** Calendar date (Lagos) of an ISO timestamp, e.g. "2026-09-24T23:30:00Z" → "2026-09-25". */
+export function toISODate(timestamp: string | Date): ISODate {
+  return isoFormatter.format(new Date(timestamp));
+}

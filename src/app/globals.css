@@ -102,14 +102,16 @@
  * scrolls horizontally. Referenced by <Table layout="…">.
  */
 :root {
-  --table-loans-cols: 90px minmax(170px, 1.4fr) 90px 120px 70px 110px minmax(130px, 1fr) 100px;
-  --table-loans-min: 920px;
-  --table-loans-compact-cols: 90px 90px 120px 110px minmax(130px, 1fr) 100px;
-  --table-loans-compact-min: 640px;
-  --table-tracker-cols: 90px minmax(140px, 1.3fr) minmax(150px, 1fr) 120px 110px 100px;
-  --table-tracker-min: 760px;
-  --table-schedule-cols: 40px 110px 1fr 1fr 1fr 130px 120px;
-  --table-schedule-min: 720px;
+  --table-loans-cols: minmax(170px, 1.4fr) 90px 120px 70px 110px minmax(130px, 1fr) 100px;
+  --table-loans-min: 818px;
+  --table-loans-compact-cols: 90px 120px 110px minmax(130px, 1fr) 100px;
+  --table-loans-compact-min: 538px;
+  --table-tracker-cols: minmax(140px, 1.3fr) minmax(150px, 1fr) 120px 110px 100px;
+  --table-tracker-min: 670px;
+  --table-schedule-cols: 40px 110px 1fr 1fr 1fr 170px 140px;
+  --table-schedule-min: 800px;
+  --table-schedule-readonly-cols: 40px 110px 1fr 1fr 1fr 170px;
+  --table-schedule-readonly-min: 660px;
   --table-schedule-preview-cols: 40px 120px 1fr 1fr 1fr;
   --table-schedule-preview-min: 560px;
   --table-users-cols: minmax(240px, 2fr) 140px 90px 90px 130px 110px;

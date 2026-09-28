@@ -1,17 +1,13 @@
 import { Identity } from "@/components/ui/Identity";
 import { formatDate } from "@/lib/format";
-import type { Customer } from "@/types/user";
+import type { ISODate } from "@/types/common";
 
 export type UserHeaderProps = {
-  customer: Customer;
+  name: string;
+  email: string;
+  joinedAt: ISODate;
 };
 
-export function UserHeader({ customer }: UserHeaderProps) {
-  return (
-    <Identity
-      name={customer.name}
-      detail={`${customer.email} · Member since ${formatDate(customer.joinedAt)}`}
-      size="page"
-    />
-  );
+export function UserHeader({ name, email, joinedAt }: UserHeaderProps) {
+  return <Identity name={name} detail={`${email} · Member since ${formatDate(joinedAt)}`} size="page" />;
 }

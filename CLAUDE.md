@@ -23,6 +23,7 @@ The reference design comes from Claude Design via the `claude_design` MCP. Treat
 - `src/types/` → shared TypeScript types (Loan, Repayment, etc.)
 - `src/api/` → axios client for goodlife-api (`callApi`, `HttpMethod`); response envelope types in `src/types/api.ts`
 - `src/store/` → client auth state (`setLogout`)
+- `src/interface/` → goodlife-api request/response shapes (`*.interface.ts`, e.g. `ILoginForm`, `IUser`)
 - `src/data/` → mock data as typed objects, never hardcoded in JSX
 
 ## Rules

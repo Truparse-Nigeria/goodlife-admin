@@ -1,49 +1,44 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { today } from "@/lib/dates";
-import { findLoan, updateLoan } from "@/lib/loan-store";
-import { requireAdmin } from "@/lib/session";
+import { deletePaymentApi, recordPaymentApi, updateLoanStatusApi } from "@/api/loan";
+import { redirectIfUnauthorized, requireAdmin } from "@/lib/session";
+import type { ActionResult } from "@/types/actions";
+import type { ApiError } from "@/types/api";
+import type { IRecordPayment, IUpdateLoanStatus } from "@/interface/loan.interface";
 
-// Loan changes touch the sidebar count, dashboard, lists and detail pages.
-function refresh() {
-  revalidatePath("/", "layout");
+/** Run an admin API call for a loan, then refresh its pages. */
+async function mutateLoan(
+  loanId: string,
+  call: (token: string) => Promise<{ error?: ApiError }>,
+): Promise<ActionResult> {
+  const { token } = await requireAdmin();
+  const { error } = await call(token);
+  redirectIfUnauthorized(error);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/loans/${loanId}`);
+  revalidatePath("/loans");
+  return {};
 }
 
-function requireLoan(id: string) {
-  const loan = findLoan(id);
-  if (!loan) throw new Error(`Loan ${id} not found`);
-  return loan;
+const decide = (loanId: string, body: IUpdateLoanStatus) =>
+  mutateLoan(loanId, (token) => updateLoanStatusApi(token, loanId, body));
+
+export async function approveLoan(loanId: string, interestPerMonth: number): Promise<ActionResult> {
+  if (!(interestPerMonth > 0 && interestPerMonth <= 100)) return { error: "Enter an interest rate between 0 and 100%." };
+  return decide(loanId, { status: "Approved", interestPerMonth });
 }
 
-export async function approveLoan(loanId: string, ratePerMonth: number): Promise<void> {
-  await requireAdmin();
-  if (!(Number.isFinite(ratePerMonth) && ratePerMonth > 0)) throw new Error("Interest rate must be greater than 0");
-  if (requireLoan(loanId).status !== "pending") throw new Error(`${loanId} is not pending`);
-  updateLoan(loanId, (l) => ({ ...l, status: "active", ratePerMonth, approvedAt: today(), paidDates: [] }));
-  refresh();
+export async function rejectLoan(loanId: string): Promise<ActionResult> {
+  return decide(loanId, { status: "Rejected" });
 }
 
-export async function rejectLoan(loanId: string): Promise<void> {
-  await requireAdmin();
-  if (requireLoan(loanId).status !== "pending") throw new Error(`${loanId} is not pending`);
-  updateLoan(loanId, (l) => ({ ...l, status: "rejected", rejectedAt: today() }));
-  refresh();
+export async function recordPayment(loanId: string, installment: number, payment: IRecordPayment): Promise<ActionResult> {
+  if (!(payment.amount > 0)) return { error: "Enter an amount greater than 0." };
+  return mutateLoan(loanId, (token) => recordPaymentApi(token, loanId, installment, payment));
 }
 
-export async function recordPayment(loanId: string): Promise<void> {
-  await requireAdmin();
-  if (requireLoan(loanId).status !== "active") throw new Error(`${loanId} is not active`);
-  updateLoan(loanId, (l) => {
-    const paidDates = [...l.paidDates, today()];
-    return { ...l, paidDates, status: paidDates.length >= l.tenureMonths ? "completed" : "active" };
-  });
-  refresh();
-}
-
-export async function undoPayment(loanId: string): Promise<void> {
-  await requireAdmin();
-  if (requireLoan(loanId).paidDates.length === 0) throw new Error(`${loanId} has no payments to undo`);
-  updateLoan(loanId, (l) => ({ ...l, paidDates: l.paidDates.slice(0, -1), status: "active" }));
-  refresh();
+export async function deletePayment(loanId: string, installment: number, paymentId: string): Promise<ActionResult> {
+  return mutateLoan(loanId, (token) => deletePaymentApi(token, loanId, installment, paymentId));
 }

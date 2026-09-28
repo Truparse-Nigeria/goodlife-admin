@@ -67,3 +67,27 @@ export function capitalize(s: string): string {
 export function fileExtension(file: string): string {
   return (file.split(".").pop() ?? "").toUpperCase();
 }
+
+/** formatAddress({ street, city, state }) → "14 Admiralty Way, Lekki, Lagos" */
+export function formatAddress(address: { street?: string; landmark?: string; city?: string; state?: string } | null | undefined): string {
+  if (!address) return "—";
+  return [address.street, address.landmark, address.city, address.state].filter(Boolean).join(", ") || "—";
+}
+
+/**
+ * Display name and type badge for an uploaded file URL.
+ * fileFromUrl("https://…/upload/v1/statement_ab12.pdf") → { name: "statement_ab12.pdf", ext: "PDF" }
+ */
+export function fileFromUrl(url: string): { name: string; ext: string } {
+  if (url.startsWith("data:")) {
+    const subtype = /^data:[^/]+\/([a-z0-9+.-]+)/i.exec(url)?.[1] ?? "file";
+    return { name: "Uploaded file", ext: subtype.toUpperCase().slice(0, 4) };
+  }
+  try {
+    const name = decodeURIComponent(new URL(url).pathname.split("/").pop() || "") || "Uploaded file";
+    const ext = name.includes(".") ? fileExtension(name).slice(0, 4) : "FILE";
+    return { name, ext };
+  } catch {
+    return { name: "Uploaded file", ext: "FILE" };
+  }
+}

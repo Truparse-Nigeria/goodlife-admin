@@ -6,12 +6,11 @@ import { NavItem } from "./NavItem";
 
 export type SidebarNavProps = {
   items: NavLink[];
-  pendingCount: number;
 };
 
 /** Client-only so the active item can follow the pathname. Detail routes
  *  (/loans/L-1024, /users/u1) highlight their parent section. */
-export function SidebarNav({ items, pendingCount }: SidebarNavProps) {
+export function SidebarNav({ items }: SidebarNavProps) {
   const pathname = usePathname();
   return (
     <nav aria-label="Main" className="flex flex-1 flex-col gap-0.5 px-3">
@@ -21,7 +20,6 @@ export function SidebarNav({ items, pendingCount }: SidebarNavProps) {
           href={item.href}
           label={item.label}
           active={pathname === item.href || pathname.startsWith(`${item.href}/`)}
-          count={item.showPendingCount ? pendingCount : undefined}
         />
       ))}
     </nav>

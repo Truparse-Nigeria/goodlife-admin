@@ -23,14 +23,15 @@ export interface Admin {
   title: string;
 }
 
-/** A customer with their portfolio totals, for the users list and detail. */
-export interface CustomerSummary {
-  customer: Customer;
+/** One row of the users table. */
+export interface UserRow {
+  id: string;
+  href: string;
+  name: string;
+  email: string;
+  phone: string;
   loanCount: number;
   activeCount: number;
-  /** Principal of approved loans. */
-  borrowed: number;
-  repaid: number;
-  /** Balance across active loans. */
   outstanding: number;
+  joinedAt: ISODate;
 }

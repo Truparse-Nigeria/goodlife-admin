@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { CardTitle } from "@/components/ui/CardTitle";
 import { cn } from "@/lib/cn";
@@ -29,7 +30,15 @@ export function ActivityTimeline({ events }: ActivityTimelineProps) {
               <span className="my-1 w-px flex-1 bg-border" />
             </div>
             <div className="min-w-0 pb-4">
-              <div className="text-13 leading-normal">{e.text}</div>
+              <div className="text-13 leading-normal">
+                {e.href ? (
+                  <Link href={e.href} className="text-ink no-underline hover:text-brand-strong hover:underline">
+                    {e.text}
+                  </Link>
+                ) : (
+                  e.text
+                )}
+              </div>
               <div className="mt-0.5 text-12 text-muted">{formatDate(e.date)}</div>
             </div>
           </li>

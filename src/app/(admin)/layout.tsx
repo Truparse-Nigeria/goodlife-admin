@@ -2,13 +2,10 @@ import { signOut } from "@/app/actions/auth";
 import { AppShell } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { adminNav } from "@/data/navigation";
-import { getAdmin } from "@/lib/loan-store";
-import { pendingCount } from "@/lib/loan-views";
 import { requireAdmin } from "@/lib/session";
 
 export default async function AdminLayout({ children }: LayoutProps<"/">) {
-  await requireAdmin();
-  const admin = getAdmin();
+  const { user } = await requireAdmin();
 
   return (
     <AppShell
@@ -16,8 +13,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
         <Sidebar
           portalLabel="Admin portal"
           items={adminNav}
-          pendingCount={pendingCount()}
-          user={{ name: admin.name, role: `${admin.title} · Admin` }}
+          user={{ name: `${user.firstName} ${user.lastName}`, role: "Admin" }}
           signOutAction={signOut}
         />
       }

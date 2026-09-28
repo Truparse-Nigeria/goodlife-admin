@@ -1,41 +1,25 @@
 import { FilterChip } from "@/components/ui/FilterChip";
-import type { LoanStatus } from "@/types/loan";
-
-export type LoanStatusFilter = LoanStatus | "all";
-
-const FILTERS: { value: LoanStatusFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
-  { value: "active", label: "Active" },
-  { value: "completed", label: "Completed" },
-  { value: "rejected", label: "Rejected" },
-];
+import { API_LOAN_STATUSES, type ApiLoanStatus } from "@/interface/loan.interface";
+import { loanListHref, type LoanListParams } from "@/lib/loan-list-params";
 
 export type LoanStatusFiltersProps = {
-  active: LoanStatusFilter;
-  counts: Record<LoanStatusFilter, number>;
-  /** Current search text, preserved across filter changes. */
-  query?: string;
+  params: LoanListParams;
+  /** Per-status totals from the API. */
+  counts: Record<ApiLoanStatus, number>;
 };
 
-function hrefFor(status: LoanStatusFilter, query?: string) {
-  const params = new URLSearchParams();
-  if (status !== "all") params.set("status", status);
-  if (query) params.set("q", query);
-  const qs = params.toString();
-  return qs ? `/loans?${qs}` : "/loans";
-}
-
-export function LoanStatusFilters({ active, counts, query }: LoanStatusFiltersProps) {
+export function LoanStatusFilters({ params, counts }: LoanStatusFiltersProps) {
+  const all = API_LOAN_STATUSES.reduce((sum, s) => sum + (counts[s] ?? 0), 0);
   return (
     <nav aria-label="Filter by status" className="flex flex-wrap gap-1.5">
-      {FILTERS.map((f) => (
+      <FilterChip href={loanListHref(params, { status: undefined })} label="All" count={all} active={!params.status} />
+      {API_LOAN_STATUSES.map((status) => (
         <FilterChip
-          key={f.value}
-          href={hrefFor(f.value, query)}
-          label={f.label}
-          count={counts[f.value]}
-          active={f.value === active}
+          key={status}
+          href={loanListHref(params, { status })}
+          label={status}
+          count={counts[status] ?? 0}
+          active={params.status === status}
         />
       ))}
     </nav>

@@ -30,29 +30,12 @@ export function listLoans(): Loan[] {
   return store().loans;
 }
 
-export function findLoan(id: string): Loan | undefined {
-  return store().loans.find((l) => l.id === id);
-}
-
-export function listCustomers(): Customer[] {
-  return store().customers;
-}
-
 export function findCustomer(id: string): Customer | undefined {
   return store().customers.find((c) => c.id === id);
 }
 
 export function getAdmin(): Admin {
   return store().admin;
-}
-
-/** Replace a loan with the result of `update`. Returns the new loan. */
-export function updateLoan(id: string, update: (loan: Loan) => Loan): Loan {
-  const s = store();
-  const index = s.loans.findIndex((l) => l.id === id);
-  if (index === -1) throw new Error(`Loan ${id} not found`);
-  s.loans[index] = update(structuredClone(s.loans[index]));
-  return s.loans[index];
 }
 
 export function updateAdmin(patch: Partial<Admin>): Admin {

@@ -10,47 +10,50 @@ import { Input } from "@/components/ui/Input";
 import { Stat } from "@/components/ui/Stat";
 import { useToast } from "@/components/ui/ToastProvider";
 import { formatMoney } from "@/lib/format";
-import { buildSchedule, sumTotals } from "@/lib/loan-schedule";
-import type { ApproveLoanAction, LoanAction } from "@/types/actions";
-import type { Loan } from "@/types/loan";
-import { RepaymentSchedule } from "./RepaymentSchedule";
+import { previewSchedule, sumTotals } from "@/lib/loan-schedule";
+import type { ApproveLoanAction, RejectLoanAction } from "@/types/actions";
+import { SchedulePreview } from "./SchedulePreview";
+
+const MAX_RATE = 100;
 
 export type ApprovalPanelProps = {
-  loan: Loan;
+  loanId: string;
+  amount: number;
+  tenureMonths: number;
   approveAction: ApproveLoanAction;
-  rejectAction: LoanAction;
+  rejectAction: RejectLoanAction;
 };
 
-/** Admin sets a monthly flat rate, previews the schedule, then approves or rejects. */
-export function ApprovalPanel({ loan, approveAction, rejectAction }: ApprovalPanelProps) {
+/** Pending loans: set a flat monthly rate, preview the schedule, then approve or reject. */
+export function ApprovalPanel({ loanId, amount, tenureMonths, approveAction, rejectAction }: ApprovalPanelProps) {
   const { toast } = useToast();
   const [rateInput, setRateInput] = useState("");
   const [pending, startTransition] = useTransition();
 
   const rate = Number.parseFloat(rateInput);
-  const valid = rate > 0;
-  const preview = valid ? buildSchedule(loan, rate) : [];
-  const repayable = sumTotals(preview);
+  const valid = rate > 0 && rate <= MAX_RATE;
+  const schedule = valid ? previewSchedule(amount, tenureMonths, rate) : [];
+  const repayable = sumTotals(schedule);
 
-  const previewStats = [
-    { label: "Monthly installment", value: valid ? formatMoney(preview[0].total) : "—" },
-    { label: "Total interest", value: valid ? formatMoney(repayable - loan.amount) : "—" },
+  const stats = [
+    { label: "Monthly installment", value: valid ? formatMoney(schedule[0].total) : "—" },
+    { label: "Total interest", value: valid ? formatMoney(repayable - amount) : "—" },
     { label: "Total repayable", value: valid ? formatMoney(repayable) : "—" },
   ];
 
   function approve() {
-    // Kept clickable while invalid (matches the design) so we can explain why.
-    if (!valid) return toast("Enter an interest rate before approving");
+    // Kept clickable while invalid (as in the design) so we can say why.
+    if (!valid) return toast(`Enter an interest rate between 0 and ${MAX_RATE}% before approving`);
     startTransition(async () => {
-      await approveAction(loan.id, rate);
-      toast(`${loan.id} approved at ${rate}% per month`);
+      const { error } = await approveAction(loanId, rate);
+      toast(error ?? `Loan approved at ${rate}% per month`);
     });
   }
 
   function reject() {
     startTransition(async () => {
-      await rejectAction(loan.id);
-      toast(`${loan.id} rejected`);
+      const { error } = await rejectAction(loanId);
+      toast(error ?? "Loan rejected");
     });
   }
 
@@ -69,6 +72,7 @@ export function ApprovalPanel({ loan, approveAction, rejectAction }: ApprovalPan
               inputMode="decimal"
               step="0.1"
               min="0"
+              max={MAX_RATE}
               placeholder="e.g. 4.5"
               value={rateInput}
               onChange={(e) => setRateInput(e.target.value)}
@@ -76,13 +80,13 @@ export function ApprovalPanel({ loan, approveAction, rejectAction }: ApprovalPan
               className="w-50 text-16 font-semibold"
             />
           </Field>
-          {previewStats.map((s) => (
+          {stats.map((s) => (
             <Stat key={s.label} variant="inline-sm" label={s.label} value={s.value} />
           ))}
         </div>
       </div>
 
-      {valid && <RepaymentSchedule mode="preview" installments={preview} />}
+      {valid && <SchedulePreview installments={schedule} />}
 
       <CardFooter>
         <Button variant="danger" onClick={reject} disabled={pending}>

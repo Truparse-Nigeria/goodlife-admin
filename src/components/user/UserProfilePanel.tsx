@@ -1,25 +1,37 @@
-import { Card } from "@/components/ui/Card";
-import { CardTitle } from "@/components/ui/CardTitle";
-import { KeyValueList } from "@/components/ui/KeyValueList";
-import type { Customer } from "@/types/user";
+import { buttonClasses } from "@/components/ui/Button";
+import { DetailsCard } from "@/components/ui/DetailsCard";
+import type { KeyValueItem } from "@/types/common";
 
 export type UserProfilePanelProps = {
-  customer: Customer;
+  rows: KeyValueItem[];
+  idUrl: string | null;
+  signatureUrl: string | null;
 };
 
-export function UserProfilePanel({ customer }: UserProfilePanelProps) {
-  const rows = [
-    { label: "Phone", value: customer.phone },
-    { label: "Address", value: customer.address },
-    { label: "BVN", value: customer.bvn },
-    { label: "Employer", value: customer.employer },
-    { label: "Valid ID", value: customer.idFile },
-    { label: "Signature", value: customer.signatureFile },
-  ];
+function DocumentLink({ url, label }: { url: string | null; label: string }) {
+  if (!url) return "Not provided";
   return (
-    <Card padding="md">
-      <CardTitle className="mb-2.5">Profile</CardTitle>
-      <KeyValueList items={rows} />
-    </Card>
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      download={url.startsWith("data:") ? label : undefined}
+      className={buttonClasses({ variant: "link" })}
+    >
+      View
+    </a>
+  );
+}
+
+export function UserProfilePanel({ rows, idUrl, signatureUrl }: UserProfilePanelProps) {
+  return (
+    <DetailsCard
+      title="Profile"
+      items={[
+        ...rows,
+        { label: "Valid ID", value: <DocumentLink url={idUrl} label="Valid ID" /> },
+        { label: "Signature", value: <DocumentLink url={signatureUrl} label="Signature" /> },
+      ]}
+    />
   );
 }

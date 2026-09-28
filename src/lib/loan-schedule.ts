@@ -1,6 +1,6 @@
 import type { ISODate } from "@/types/common";
 import type { DisplayStatus, Loan } from "@/types/loan";
-import type { Installment, InstallmentStatus, LoanSummary } from "@/types/repayment";
+import type { Installment, LoanSummary } from "@/types/repayment";
 import { addMonths, today } from "./dates";
 
 type ScheduleInput = Pick<Loan, "amount" | "tenureMonths" | "ratePerMonth" | "approvedAt" | "paidDates" | "status">;
@@ -66,20 +66,16 @@ export function sumTotals(installments: Installment[]): number {
   return installments.reduce((acc, i) => acc + i.total, 0);
 }
 
-/** Total interest over the life of the loan at a given monthly rate. */
-export function totalInterest(loan: Pick<Loan, "amount" | "tenureMonths">, rate: number): number {
-  return ((loan.amount * rate) / 100) * loan.tenureMonths;
-}
-
 /** Active loans with a missed installment read as "overdue". */
 export function displayStatus(loan: Loan, summary: LoanSummary): DisplayStatus {
   return loan.status === "active" && summary.overdueCount > 0 ? "overdue" : loan.status;
 }
 
-/** Status of installment at `index`, given how many have been paid. */
-export function installmentStatus(installment: Installment, index: number, paidCount: number): InstallmentStatus {
-  if (installment.paidAt) return "paid";
-  if (installment.overdue) return "overdue";
-  if (index === paidCount) return "due-next";
-  return "upcoming";
+
+/** Estimated flat-interest schedule for a loan not yet approved (first due a month from today). */
+export function previewSchedule(amount: number, tenureMonths: number, ratePerMonth: number): Installment[] {
+  return buildSchedule(
+    { amount, tenureMonths, ratePerMonth, approvedAt: null, paidDates: [], status: "pending" },
+    ratePerMonth,
+  );
 }

@@ -3,10 +3,12 @@ import type { DisplayStatus } from "@/types/loan";
 
 const STATUS: Record<DisplayStatus, { label: string; tone: BadgeTone }> = {
   pending: { label: "Pending", tone: "warning" },
+  approved: { label: "Approved", tone: "success" },
   active: { label: "Active", tone: "brand" },
   overdue: { label: "Overdue", tone: "danger" },
   completed: { label: "Completed", tone: "success" },
   rejected: { label: "Rejected", tone: "neutral" },
+  defaulted: { label: "Defaulted", tone: "danger" },
 };
 
 export type LoanStatusBadgeProps = {

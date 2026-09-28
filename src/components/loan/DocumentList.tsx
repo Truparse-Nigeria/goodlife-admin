@@ -1,23 +1,36 @@
+import { buttonClasses } from "@/components/ui/Button";
 import { FileRow } from "@/components/ui/FileRow";
-import { ToastButton } from "@/components/ui/ToastButton";
-import type { DocumentEntry } from "@/lib/loan-documents";
+import { fileFromUrl } from "@/lib/format";
+import type { DocumentLink } from "@/lib/loan-detail";
 
 export type DocumentListProps = {
-  docs: DocumentEntry[];
+  docs: DocumentLink[];
 };
 
-/** Downloadable file rows. Downloads are mocked until the API serves files. */
+/** Uploaded files, each opening in a new tab (inline data URLs download). */
 export function DocumentList({ docs }: DocumentListProps) {
-  return docs.map((d) => (
-    <FileRow
-      key={d.label}
-      label={d.label}
-      fileName={d.fileName}
-      action={
-        <ToastButton variant="soft" size="sm" message={`Downloading ${d.fileName}`}>
-          Download
-        </ToastButton>
-      }
-    />
-  ));
+  return docs.map(({ label, url }) => {
+    const file = url ? fileFromUrl(url) : null;
+    return (
+      <FileRow
+        key={label}
+        label={label}
+        fileName={file?.name ?? "Not provided"}
+        ext={file?.ext ?? "—"}
+        action={
+          url ? (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              download={url.startsWith("data:") ? label : undefined}
+              className={buttonClasses({ variant: "soft", size: "sm" })}
+            >
+              View
+            </a>
+          ) : null
+        }
+      />
+    );
+  });
 }

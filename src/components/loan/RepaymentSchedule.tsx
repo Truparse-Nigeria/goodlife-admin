@@ -1,107 +1,83 @@
+import { recordPayment } from "@/app/actions/loans";
 import { Table } from "@/components/ui/Table";
 import { TableFooter } from "@/components/ui/TableFooter";
 import { TableHead } from "@/components/ui/TableHead";
 import { TableRow } from "@/components/ui/TableRow";
+import type { ILoanDetail } from "@/interface/loan.interface";
+import { toISODate } from "@/lib/dates";
 import { formatDate, formatMoney } from "@/lib/format";
-import { installmentStatus, sumTotals } from "@/lib/loan-schedule";
-import type { LoanAction } from "@/types/actions";
-import type { Installment } from "@/types/repayment";
+import { installmentRows } from "@/lib/loan-detail";
 import { InstallmentStatusBadge } from "./InstallmentStatusBadge";
-import { PaymentActionButton } from "./PaymentActionButton";
+import { PaymentList } from "./PaymentList";
+import { RecordPaymentDialog } from "./RecordPaymentDialog";
 
-type LiveProps = {
-  mode: "live";
-  loanId: string;
-  installments: Installment[];
-  paidCount: number;
-  /** Only an active loan can take a new payment. */
-  canRecord: boolean;
-  recordPaymentAction: LoanAction;
-  undoPaymentAction: LoanAction;
+export type RepaymentScheduleProps = {
+  loan: ILoanDetail;
+  /** Customer view: no record/remove actions and no action column. */
+  readOnly?: boolean;
 };
 
-type PreviewProps = {
-  mode: "preview";
-  installments: Installment[];
-};
+const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
 
-export type RepaymentScheduleProps = LiveProps | PreviewProps;
-
-/**
- * live    — approved loan: status per installment, record/undo actions, totals
- * preview — estimated schedule while an admin is choosing a rate
- */
-export function RepaymentSchedule(props: RepaymentScheduleProps) {
-  const { mode, installments } = props;
-  const live = mode === "live";
+/** Monthly installments with their status, payments and (for admins) the record-payment action. */
+export function RepaymentSchedule({ loan, readOnly = false }: RepaymentScheduleProps) {
+  const rows = installmentRows(loan);
+  const canRemove = !readOnly && (loan.status === "Approved" || loan.status === "Completed");
 
   return (
-    <Table layout={live ? "schedule" : "schedule-preview"}>
+    <Table layout={readOnly ? "schedule-readonly" : "schedule"}>
       <TableHead>
         <div>#</div>
-        <div>{live ? "Due date" : "Due date (est.)"}</div>
+        <div>Due date</div>
         <div>Principal</div>
         <div>Interest</div>
         <div>Installment</div>
-        {live && <div>Status</div>}
-        {live && <div />}
+        <div>Status</div>
+        {!readOnly && <div />}
       </TableHead>
 
-      {installments.map((inst, i) => {
-        const status = live ? installmentStatus(inst, i, props.paidCount) : null;
+      {rows.map(({ installment: i, display, detail, canRecord }) => {
+        const due = formatDate(toISODate(i.dueDate));
         return (
-          <TableRow
-            key={inst.number}
-            density={live ? "compact" : "dense"}
-            tone={inst.overdue ? "danger" : "default"}
-            className="tabular-nums"
-          >
-            <div className="text-muted">{inst.number}</div>
-            <div className="text-13">{formatDate(inst.dueDate)}</div>
-            <div>{formatMoney(inst.principal)}</div>
-            <div>{formatMoney(inst.interest)}</div>
-            <div className="font-semibold">{formatMoney(inst.total)}</div>
-            {live && status && (
-              <div className="flex flex-col items-start gap-0.5">
-                <InstallmentStatusBadge status={status} />
-                {inst.paidAt && <span className="text-11 text-muted">on {formatDate(inst.paidAt)}</span>}
+          <TableRow key={i.number} density="compact" tone={display === "overdue" ? "danger" : "default"} className="tabular-nums">
+            <div className="text-muted">{i.number}</div>
+            <div className="text-13">{due}</div>
+            <div>{formatMoney(i.principal)}</div>
+            <div>{formatMoney(i.interest)}</div>
+            <div className="font-semibold">{formatMoney(i.amountDue)}</div>
+            <div className="flex flex-col items-start gap-0.5">
+              <InstallmentStatusBadge status={display} />
+              {detail && <span className="text-11 text-muted">{detail}</span>}
+            </div>
+            {!readOnly && (
+              <div className="flex justify-end">
+                {canRecord && (
+                  <RecordPaymentDialog
+                    loanId={loan.id}
+                    installmentNumber={i.number}
+                    dueLabel={due}
+                    balance={i.balance}
+                    recordAction={recordPayment}
+                  />
+                )}
               </div>
             )}
-            {live && (
-              <div className="flex justify-end">
-                {props.canRecord && i === props.paidCount && (
-                  <PaymentActionButton
-                    kind="record"
-                    loanId={props.loanId}
-                    action={props.recordPaymentAction}
-                    amountLabel={formatMoney(inst.total)}
-                  />
-                )}
-                {i === props.paidCount - 1 && (
-                  <PaymentActionButton
-                    kind="undo"
-                    loanId={props.loanId}
-                    action={props.undoPaymentAction}
-                    amountLabel={formatMoney(inst.total)}
-                  />
-                )}
-              </div>
+            {i.payments.length > 0 && (
+              <PaymentList loanId={loan.id} installmentNumber={i.number} payments={i.payments} canRemove={canRemove} />
             )}
           </TableRow>
         );
       })}
 
-      {live && (
-        <TableFooter>
-          <div />
-          <div>Total</div>
-          <div>{formatMoney(installments.reduce((a, i) => a + i.principal, 0))}</div>
-          <div>{formatMoney(installments.reduce((a, i) => a + i.interest, 0))}</div>
-          <div>{formatMoney(sumTotals(installments))}</div>
-          <div />
-          <div />
-        </TableFooter>
-      )}
+      <TableFooter>
+        <div />
+        <div>Total</div>
+        <div>{formatMoney(sum(loan.installments.map((i) => i.principal)))}</div>
+        <div>{formatMoney(sum(loan.installments.map((i) => i.interest)))}</div>
+        <div>{formatMoney(sum(loan.installments.map((i) => i.amountDue)))}</div>
+        <div />
+        {!readOnly && <div />}
+      </TableFooter>
     </Table>
   );
 }

@@ -1,15 +1,16 @@
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
-import type { InstallmentStatus } from "@/types/repayment";
+import type { InstallmentDisplay } from "@/lib/loan-detail";
 
-const STATUS: Record<InstallmentStatus, { label: string; tone: BadgeTone }> = {
+const STATUS: Record<InstallmentDisplay, { label: string; tone: BadgeTone }> = {
   paid: { label: "Paid", tone: "success" },
+  partial: { label: "Partially paid", tone: "warning" },
   overdue: { label: "Overdue", tone: "danger" },
   "due-next": { label: "Due next", tone: "brand" },
   upcoming: { label: "Upcoming", tone: "muted" },
 };
 
 export type InstallmentStatusBadgeProps = {
-  status: InstallmentStatus;
+  status: InstallmentDisplay;
 };
 
 export function InstallmentStatusBadge({ status }: InstallmentStatusBadgeProps) {

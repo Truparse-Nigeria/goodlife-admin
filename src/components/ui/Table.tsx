@@ -2,7 +2,14 @@ import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 /** Column layouts defined as tokens in globals.css (--table-<layout>-cols / -min). */
-export type TableLayout = "loans" | "loans-compact" | "tracker" | "schedule" | "schedule-preview" | "users";
+export type TableLayout =
+  | "loans"
+  | "loans-compact"
+  | "tracker"
+  | "schedule"
+  | "schedule-readonly"
+  | "schedule-preview"
+  | "users";
 
 export type TableProps = {
   layout: TableLayout;

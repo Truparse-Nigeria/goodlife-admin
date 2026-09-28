@@ -1,8 +1,5 @@
 import type { ISODate } from "./common";
 
-/** Derived per-installment state shown in the repayment breakdown. */
-export type InstallmentStatus = "paid" | "overdue" | "due-next" | "upcoming";
-
 /** One row of a repayment schedule. Derived from a Loan, never stored. */
 export interface Installment {
   /** 1-based installment number. */

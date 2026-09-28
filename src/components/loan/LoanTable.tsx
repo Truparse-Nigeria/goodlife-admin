@@ -4,8 +4,7 @@ import { TableEmpty } from "@/components/ui/TableEmpty";
 import { TableHead } from "@/components/ui/TableHead";
 import { TableRow } from "@/components/ui/TableRow";
 import { capitalize, formatDate, formatMoney } from "@/lib/format";
-import type { LoanView } from "@/types/loan";
-import { LoanIdCell } from "./LoanIdCell";
+import type { LoanRow } from "@/types/loan";
 import { LoanStatusBadge } from "./LoanStatusBadge";
 import { RepaymentProgress } from "./RepaymentProgress";
 
@@ -16,7 +15,7 @@ import { RepaymentProgress } from "./RepaymentProgress";
 export type LoanTableVariant = "full" | "compact";
 
 export type LoanTableProps = {
-  loans: LoanView[];
+  loans: LoanRow[];
   variant?: LoanTableVariant;
   emptyMessage?: string;
 };
@@ -26,7 +25,6 @@ export function LoanTable({ loans, variant = "full", emptyMessage = "No loans ma
   return (
     <Table layout={full ? "loans" : "loans-compact"}>
       <TableHead placement={full ? "standalone" : "attached"}>
-        <div>Loan ID</div>
         {full && <div>Applicant</div>}
         <div>Type</div>
         <div>Amount</div>
@@ -36,13 +34,12 @@ export function LoanTable({ loans, variant = "full", emptyMessage = "No loans ma
         <div>Status</div>
       </TableHead>
 
-      {loans.map(({ loan, customer, summary, status }) => (
-        <TableRow key={loan.id} href={`/loans/${loan.id}`}>
-          <LoanIdCell id={loan.id} />
+      {loans.map((loan) => (
+        <TableRow key={loan.id} href={loan.href}>
           {full && (
             <div className="flex min-w-0 items-center gap-2.5">
-              <Avatar name={customer.name} size="sm" tone="neutral" />
-              <span className="truncate">{customer.name}</span>
+              <Avatar name={loan.applicantName} size="sm" tone="neutral" />
+              <span className="truncate">{loan.applicantName}</span>
             </div>
           )}
           <div className="text-ink-soft">{capitalize(loan.type)}</div>
@@ -50,17 +47,14 @@ export function LoanTable({ loans, variant = "full", emptyMessage = "No loans ma
           {full && <div className="text-ink-soft">{loan.tenureMonths} mo</div>}
           <div className="text-13 text-ink-soft">{formatDate(loan.appliedAt)}</div>
           <div>
-            {summary.running ? (
-              <RepaymentProgress
-                label={`${summary.paidCount} of ${loan.tenureMonths} paid · ${summary.percentPaid}%`}
-                percent={summary.percentPaid}
-              />
+            {loan.progress ? (
+              <RepaymentProgress label={loan.progress.label} percent={loan.progress.percent} />
             ) : (
               <span className="text-subtle">—</span>
             )}
           </div>
           <div>
-            <LoanStatusBadge status={status} />
+            <LoanStatusBadge status={loan.status} />
           </div>
         </TableRow>
       ))}

@@ -1,8 +1,6 @@
-import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import type { KeyValueItem } from "@/types/common";
 import { KeyValueRow } from "./KeyValueRow";
-
-export type KeyValueItem = { label: string; value: ReactNode };
 
 export type KeyValueListProps = {
   items: KeyValueItem[];

@@ -1,13 +1,13 @@
 export interface NavLink {
   href: string;
   label: string;
-  /** Show the pending-applications count next to this item. */
-  showPendingCount?: boolean;
 }
+
+export const customerNav: NavLink[] = [{ href: "/my-loans", label: "My loans" }];
 
 export const adminNav: NavLink[] = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/loans", label: "Loan applications", showPendingCount: true },
+  { href: "/loans", label: "Loan applications" },
   { href: "/users", label: "All users" },
   { href: "/profile", label: "Profile" },
 ];

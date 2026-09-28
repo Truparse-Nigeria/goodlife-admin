@@ -7,4 +7,6 @@ export interface ActivityEvent {
   date: ISODate;
   kind: ActivityKind;
   text: string;
+  /** Optional link, e.g. to the loan the event is about. */
+  href?: string;
 }

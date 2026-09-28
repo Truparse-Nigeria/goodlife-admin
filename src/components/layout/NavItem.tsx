@@ -1,15 +1,13 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
-import { Badge } from "@/components/ui/Badge";
 
 export type NavItemProps = {
   href: string;
   label: string;
   active: boolean;
-  count?: number;
 };
 
-export function NavItem({ href, label, active, count }: NavItemProps) {
+export function NavItem({ href, label, active }: NavItemProps) {
   return (
     <Link
       href={href}
@@ -23,11 +21,6 @@ export function NavItem({ href, label, active, count }: NavItemProps) {
     >
       <span aria-hidden className={cn("size-1.5 rounded-full", active ? "bg-brand" : "bg-faint")} />
       <span className="flex-1">{label}</span>
-      {count ? (
-        <Badge tone="accent" size="xs">
-          {count}
-        </Badge>
-      ) : null}
     </Link>
   );
 }
