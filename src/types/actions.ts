@@ -10,4 +10,5 @@ export type RecordPaymentAction = (
   installment: number,
   payment: IRecordPayment,
 ) => Promise<ActionResult>;
-export type DeletePaymentAction = (loanId: string, installment: number, paymentId: string) => Promise<ActionResult>;
+export type TeamMemberAction = (id: string) => Promise<ActionResult>;
+export type DeletePaymentAction =(loanId: string, installment: number, paymentId: string) => Promise<ActionResult>;

@@ -116,6 +116,8 @@
   --table-schedule-preview-min: 560px;
   --table-users-cols: minmax(240px, 2fr) 140px 90px 90px 130px 110px;
   --table-users-min: 780px;
+  --table-team-cols: minmax(240px, 2fr) 100px 100px 130px 170px;
+  --table-team-min: 780px;
 }
 
 /* Responsive tile grid; tile minimum comes from --auto-min (see <AutoGrid>). */

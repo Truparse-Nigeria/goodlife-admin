@@ -9,5 +9,6 @@ export const adminNav: NavLink[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/loans", label: "Loan applications" },
   { href: "/users", label: "All users" },
+  { href: "/team", label: "Team" },
   { href: "/profile", label: "Profile" },
 ];

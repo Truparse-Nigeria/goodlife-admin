@@ -9,7 +9,8 @@ export type TableLayout =
   | "schedule"
   | "schedule-readonly"
   | "schedule-preview"
-  | "users";
+  | "users"
+  | "team";
 
 export type TableProps = {
   layout: TableLayout;
