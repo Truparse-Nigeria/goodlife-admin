@@ -8,7 +8,7 @@ export function Toast({ message }: ToastProps) {
     <div
       role="status"
       aria-live="polite"
-      className="fixed right-6 bottom-6 z-50 flex items-center gap-2.5 rounded-md bg-ink px-4.5 py-3 text-14 text-on-ink shadow-toast"
+      className="fixed inset-x-4 bottom-4 z-50 sm:inset-x-auto sm:right-6 sm:bottom-6 flex items-center gap-2.5 rounded-md bg-ink px-4.5 py-3 text-14 text-on-ink shadow-toast"
     >
       <span aria-hidden className="size-2 rounded-full bg-accent" />
       {message}

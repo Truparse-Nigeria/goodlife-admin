@@ -50,7 +50,7 @@ export function SearchInput({ defaultValue = "", placeholder, param = "q", class
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       aria-label={placeholder}
-      className={cn("w-65 max-w-full", className)}
+      className={cn("w-full sm:w-65", className)}
     />
   );
 }

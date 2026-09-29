@@ -67,13 +67,20 @@ export interface ILoansMeta extends IPaginationMeta {
 export type PaymentMethod = "Transfer" | "Cheque" | "Cash";
 export const PAYMENT_METHODS: PaymentMethod[] = ["Transfer", "Cheque", "Cash"];
 
-/** Derived by the API from payments vs amount due. */
-export type InstallmentStatus = "Unpaid" | "Partially paid" | "Paid";
+/**
+ * Derived by the API. "Covered": settled by credit from earlier months.
+ * "Missed": the month ended short and the rest moved on as arrears.
+ */
+export type InstallmentStatus = "Unpaid" | "Partially paid" | "Paid" | "Covered" | "Missed";
 
-/** A payment recorded against an installment (naira). */
+/** What to do with the part of a payment above the month's amount due. */
+export type ExcessChoice = "Carry forward" | "Reduce capital";
+
+/** A payment, recorded against the month that was open (naira). */
 export interface IPayment {
   id: string;
   amount: number;
+  excess: ExcessChoice;
   method: PaymentMethod;
   paidAt: string;
   reference: string | null;
@@ -83,37 +90,72 @@ export interface IPayment {
   recordedBy?: string | null;
 }
 
-/** One month of the repayment schedule (naira). */
+/**
+ * One month of the repayment schedule (naira). Interest is charged on the
+ * capital outstanding; the capital is due with the final month. Months after
+ * the open one are the plan (nothing carried or paid yet).
+ */
 export interface IInstallment {
   number: number;
   dueDate: string;
-  principal: number;
+  /** Added after the tenure because capital was still owed. */
+  isExtension: boolean;
+  /** Capital outstanding this month. */
+  capital: number;
   interest: number;
+  /** Capital due this month (final month and extensions only). */
+  principalDue: number;
+  /** interest + principalDue, before credit or arrears. */
+  scheduled: number;
+  /** From the previous month: + credit, − arrears. */
+  carriedIn: number;
+  /** scheduled − carriedIn, never below 0. */
   amountDue: number;
   amountPaid: number;
   balance: number;
   status: InstallmentStatus;
-  /** Past due and not fully paid. */
+  /** Ended short; the rest moved to the next month as arrears. */
   overdue: boolean;
+  /** The month payments are recorded against now. */
+  isCurrent: boolean;
+  /** Where this month's overpayment went. */
+  toCapital: number;
+  /** To the next month: + credit, − arrears. */
+  carriedOut: number;
+  refund: number;
   payments: IPayment[];
 }
 
-/** Totals across the schedule (naira). */
+/** Loan-level repayment figures (naira). */
 export interface IRepaymentSummary {
+  /** Principal + interest over every month, including the plan ahead. */
   totalRepayable: number;
+  totalInterest: number;
   totalPaid: number;
   balance: number;
+  capitalOutstanding: number;
+  monthlyInterest: number;
+  /** Older API name for monthlyInterest. */
   monthlyInstallment: number;
+  /** Amount scheduled for the last month (capital + its interest). */
+  finalPayment: number;
+  finalDueDate: string | null;
+  /** Credit / arrears brought into the open month. */
+  credit: number;
+  arrears: number;
+  refundDue: number;
   installmentsPaid: number;
   installmentsTotal: number;
+  /** In arrears (a month ended short) or past the tenure with capital still owed. */
+  overdue: boolean;
+  /** Month payments go to; null once repaid. */
+  currentPeriod: number | null;
+  nextDueDate: string | null;
+  nextAmountDue: number;
 }
 
-/** Repayment summary on list rows: totals plus whether an installment is overdue. */
-export type ILoanRepaymentProgress = IRepaymentSummary & {
-  overdue: boolean;
-  /** Due date of the earliest installment not fully paid; null once all are paid. */
-  nextDueDate?: string | null;
-};
+/** Repayment summary on list rows. */
+export type ILoanRepaymentProgress = IRepaymentSummary;
 
 /** GET /admin/loans/stats — dashboard KPIs across disbursed loans (naira). */
 export interface ILoanStats {
@@ -124,19 +166,23 @@ export interface ILoanStats {
   outstandingBalance: number;
   /** Loans not fully paid. */
   openCount: number;
-  /** Of those, loans with an installment past due. */
+  /** Of those, loans in arrears or past their end date with capital still owed. */
   overdueCount: number;
 }
 
-/** Body for POST /admin/loans/:id/installments/:number/payments. */
+/** Body for POST /admin/loans/:id/payments (recorded against the open month). */
 export interface IRecordPayment {
-  /** Naira, ≤ 2 decimals, ≤ the installment's balance. */
+  /** Naira, ≤ 2 decimals. Any amount: short part-pays, over is handled by `excess`. */
   amount: number;
   method: PaymentMethod;
   /** "YYYY-MM-DD"; defaults to today. */
   paidAt?: string;
   reference?: string;
   note?: string;
+  /** Defaults to "Carry forward". */
+  excess?: ExcessChoice;
+  /** The month the admin saw as open; the API refuses if that changed. */
+  period?: number;
 }
 
 /** GET /admin/loans/:id. Dates are ISO timestamps; document values are URLs. */
@@ -165,6 +211,8 @@ export interface ILoanDetail {
   /** Empty until approved. */
   installments: IInstallment[];
   repayment: IRepaymentSummary | null;
+  /** The only payment that can be undone. */
+  lastPaymentId: string | null;
   applicant: {
     title: Title | null;
     firstName: string;
@@ -197,6 +245,8 @@ export interface ILoanDetail {
     cacCertificate: string | null;
     memart: string | null;
     statusReport: string | null;
+    /** Prefilled loan form saved when the loan was requested; null for older loans. */
+    loanForm: string | null;
   };
 }
 

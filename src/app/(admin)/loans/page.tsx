@@ -36,7 +36,7 @@ export default async function LoansPage({ searchParams }: PageProps<"/loans">) {
         title="Loan applications"
         subtitle="Review, approve and track every loan."
         actions={
-          <div className="flex gap-2.5">
+          <div className="flex flex-wrap gap-2.5">
             <ExportLoansButton href={loanExportHref(params)} />
             <ButtonLink href="/loans/new">Create loan</ButtonLink>
           </div>

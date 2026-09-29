@@ -1,5 +1,5 @@
-import { buttonClasses } from "@/components/ui/Button";
 import { DetailsCard } from "@/components/ui/DetailsCard";
+import { DocumentViewer } from "@/components/ui/DocumentViewer";
 import type { KeyValueItem } from "@/types/common";
 
 export type UserProfilePanelProps = {
@@ -10,17 +10,7 @@ export type UserProfilePanelProps = {
 
 function DocumentLink({ url, label }: { url: string | null; label: string }) {
   if (!url) return "Not provided";
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      download={url.startsWith("data:") ? label : undefined}
-      className={buttonClasses({ variant: "link" })}
-    >
-      View
-    </a>
-  );
+  return <DocumentViewer label={label} url={url} variant="link" />;
 }
 
 export function UserProfilePanel({ rows, idUrl, signatureUrl }: UserProfilePanelProps) {

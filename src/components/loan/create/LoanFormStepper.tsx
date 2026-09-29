@@ -22,7 +22,7 @@ export function LoanFormStepper({ steps, current, onSelect }: LoanFormStepperPro
               onClick={() => onSelect(i)}
               aria-current={active ? "step" : undefined}
               className={cn(
-                "flex w-full items-center justify-center gap-2 rounded-segment p-2.5 text-13 transition-colors",
+                "flex w-full flex-col items-center justify-center gap-1 rounded-segment p-2.5 text-12 transition-colors sm:flex-row sm:gap-2 sm:text-13",
                 active && "bg-surface font-semibold text-ink shadow-segment",
                 done && "cursor-pointer bg-brand-soft font-medium text-brand-strong hover:bg-brand-soft-hover",
                 !active && !done && "font-medium text-muted",

@@ -34,6 +34,9 @@
   --color-brand-hover: #0e8c8d;
   --color-brand-soft: #e1f3f3;
   --color-brand-soft-hover: #cbebeb;
+  --color-brand-border: #bfe3e3; /* record-payment panel */
+  --color-brand-tint: #f4fafa; /* record-payment panel */
+  --color-brand-wash: #fafdfd; /* open month's schedule row */
   --color-on-brand: #ffffff;
   --color-on-ink: #ffffff;
 
@@ -108,16 +111,23 @@
   --table-loans-compact-min: 538px;
   --table-tracker-cols: minmax(140px, 1.3fr) minmax(150px, 1fr) 120px 110px 100px;
   --table-tracker-min: 670px;
-  --table-schedule-cols: 40px 110px 1fr 1fr 1fr 170px 140px;
-  --table-schedule-min: 800px;
-  --table-schedule-readonly-cols: 40px 110px 1fr 1fr 1fr 170px;
-  --table-schedule-readonly-min: 660px;
+  --table-schedule-cols: 36px 100px minmax(110px, 1fr) minmax(90px, 1fr) minmax(110px, 1fr) minmax(130px, 1.2fr)
+    minmax(130px, 1.2fr) 118px 118px;
+  --table-schedule-min: 1040px;
+  --table-schedule-readonly-cols: 36px 100px minmax(110px, 1fr) minmax(90px, 1fr) minmax(110px, 1fr)
+    minmax(130px, 1.2fr) minmax(130px, 1.2fr) 118px;
+  --table-schedule-readonly-min: 910px;
   --table-schedule-preview-cols: 40px 120px 1fr 1fr 1fr;
   --table-schedule-preview-min: 560px;
   --table-users-cols: minmax(240px, 2fr) 140px 90px 90px 130px 110px;
   --table-users-min: 780px;
   --table-team-cols: minmax(240px, 2fr) 100px 100px 130px 170px;
   --table-team-min: 780px;
+}
+
+/* Document viewer modal: height of the preview area. */
+:root {
+  --viewer-height: 75vh;
 }
 
 /* Responsive tile grid; tile minimum comes from --auto-min (see <AutoGrid>). */

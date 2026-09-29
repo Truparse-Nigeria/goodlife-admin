@@ -107,55 +107,84 @@ export function businessDocuments(loan: ILoanDetail): DocumentLink[] {
 
 /* ---------- Repayment schedule ---------- */
 
-export type InstallmentDisplay = "paid" | "partial" | "overdue" | "due-next" | "upcoming";
+export type InstallmentDisplay = "paid" | "covered" | "partial" | "overdue" | "due-next" | "upcoming";
 
 export interface InstallmentRow {
   installment: IInstallment;
   display: InstallmentDisplay;
-  /** Line under the badge, e.g. "on 1 Jul 2026" or "₦100,000 of ₦295,833 paid". */
-  detail: string | null;
-  /** Payments are recorded against the earliest installment not yet fully paid. */
+  /** Under the amount due: credit or arrears brought in. */
+  dueNote: { text: string; tone: "warning" | "danger" } | null;
+  /** Under the amount paid: where an overpayment went. */
+  paidNote: string | null;
+  /** Under the badge, e.g. "on 1 Jul 2026". */
+  paidOn: string | null;
+  /** Payments are recorded against the open month. */
   canRecord: boolean;
+  /** Holds the loan's most recent payment, the only one that can be undone. */
+  canUndo: boolean;
 }
 
-const paidOf = (i: IInstallment) => `${formatMoney(i.amountPaid)} of ${formatMoney(i.amountDue)} paid`;
+function displayOf(i: IInstallment): InstallmentDisplay {
+  if (i.status === "Paid") return "paid";
+  if (i.status === "Covered") return "covered";
+  if (i.overdue) return "overdue";
+  if (i.status === "Partially paid") return "partial";
+  return i.isCurrent ? "due-next" : "upcoming";
+}
+
+function dueNoteOf(i: IInstallment): InstallmentRow["dueNote"] {
+  if (i.carriedIn > 0) return { text: `${formatMoney(i.carriedIn)} credit applied`, tone: "warning" };
+  if (i.carriedIn < 0) return { text: `incl. ${formatMoney(-i.carriedIn)} arrears`, tone: "danger" };
+  return null;
+}
+
+function paidNoteOf(i: IInstallment): string | null {
+  if (i.toCapital > 0) return `${formatMoney(i.toCapital)} to capital`;
+  if (i.carriedOut > 0 && i.payments.length > 0) return `${formatMoney(i.carriedOut)} to next month`;
+  if (i.refund > 0) return `${formatMoney(i.refund)} refund due`;
+  return null;
+}
 
 export function installmentRows(loan: ILoanDetail): InstallmentRow[] {
-  const nextIndex = loan.installments.findIndex((i) => i.status !== "Paid");
   const acceptsPayments = loan.status === "Approved";
+  const undoable = loan.status === "Approved" || loan.status === "Completed";
 
-  return loan.installments.map((installment, index) => {
+  return loan.installments.map((installment) => {
     const lastPayment = installment.payments.at(-1);
-    let display: InstallmentDisplay;
-    let detail: string | null = null;
-
-    if (installment.status === "Paid") {
-      display = "paid";
-      detail = lastPayment ? `on ${date(lastPayment.paidAt)}` : null;
-    } else if (installment.overdue) {
-      display = "overdue";
-      detail = installment.amountPaid > 0 ? paidOf(installment) : null;
-    } else if (installment.status === "Partially paid") {
-      display = "partial";
-      detail = paidOf(installment);
-    } else {
-      display = index === nextIndex ? "due-next" : "upcoming";
-    }
-
-    return { installment, display, detail, canRecord: acceptsPayments && index === nextIndex };
+    return {
+      installment,
+      display: displayOf(installment),
+      dueNote: dueNoteOf(installment),
+      paidNote: paidNoteOf(installment),
+      paidOn: lastPayment ? `on ${date(lastPayment.paidAt)}` : null,
+      canRecord: acceptsPayments && installment.isCurrent,
+      canUndo: undoable && installment.payments.some((p) => p.id === loan.lastPaymentId),
+    };
   });
+}
+
+/** The open month, which payments are recorded against. */
+export function currentInstallment(loan: ILoanDetail): IInstallment | null {
+  return loan.installments.find((i) => i.isCurrent) ?? null;
 }
 
 /** Summary figures once the loan has a schedule. */
 export function repaymentMetrics(loan: ILoanDetail): KeyValueItem[] {
   const r = loan.repayment!;
   return [
-    { label: "Principal", value: formatMoney(loan.amount) },
+    { label: "Capital outstanding", value: formatMoney(r.capitalOutstanding) },
     { label: "Interest rate", value: `${loan.interestPerMonth}% / month` },
-    { label: "Monthly installment", value: formatMoney(r.monthlyInstallment) },
-    { label: "Total repayable", value: formatMoney(r.totalRepayable) },
+    { label: "Monthly interest", value: formatMoney(r.monthlyInterest) },
+    { label: "Final payment", value: formatMoney(r.finalPayment) },
     { label: "Balance", value: formatMoney(r.balance) },
   ];
+}
+
+/** Badge beside the schedule title while the open month has credit. */
+export function creditLabel(loan: ILoanDetail): string | null {
+  const r = loan.repayment;
+  if (!r || r.credit <= 0 || r.currentPeriod == null) return null;
+  return `${formatMoney(r.credit)} credit toward month ${r.currentPeriod}`;
 }
 
 export interface RepaymentProgress {
@@ -178,6 +207,9 @@ export function repaymentProgress(loan: ILoanDetail): RepaymentProgress | null {
 }
 
 export function scheduleSubtitle(loan: ILoanDetail): string {
-  const first = loan.installments[0];
-  return `${loan.interestPerMonth}% flat interest per month · ${formatMoney(loan.repayment?.monthlyInstallment ?? 0)} monthly from ${date(first?.dueDate ?? null)}`;
+  const finalDue = date(loan.repayment?.finalDueDate ?? null);
+  const extended = loan.installments.some((i) => i.isExtension)
+    ? " Capital still owed after the tenure rolls into a new month with interest until it’s repaid."
+    : "";
+  return `Interest of ${loan.interestPerMonth}% is charged monthly on the outstanding capital. The capital is repaid with the final installment on ${finalDue}. Overpayments can be moved to the next month or used to reduce capital.${extended}`;
 }

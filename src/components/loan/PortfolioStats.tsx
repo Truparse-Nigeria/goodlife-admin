@@ -15,7 +15,7 @@ export function PortfolioStats({ stats }: PortfolioStatsProps) {
       <Stat
         label="Total disbursed"
         value={formatMoney(stats.totalDisbursed)}
-        note={`${stats.disbursedCount} approved loans`}
+        note={`${stats.disbursedCount} loans disbursed`}
       />
       <Stat
         label="Total repaid"
@@ -30,7 +30,7 @@ export function PortfolioStats({ stats }: PortfolioStatsProps) {
       <Stat
         label="Loans not fully paid"
         value={stats.openCount}
-        note={`${stats.overdueCount} with overdue installments`}
+        note={`${stats.overdueCount} in arrears or past their end date`}
         noteTone={stats.overdueCount ? "danger" : "muted"}
       />
     </AutoGrid>

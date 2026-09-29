@@ -73,7 +73,7 @@ export default async function MyLoanPage({ params }: PageProps<"/my-loans/[id]">
     <div className="flex flex-col gap-5">
       <LoanHeader
         title={formatMoney(loan.amount)}
-        status={loanDisplayStatus(loan.status, installments.some((i) => i.overdue))}
+        status={loanDisplayStatus(loan.status, loan.repayment?.overdue ?? false)}
         subtitle={loanSubtitle(loan)}
         backHref="/my-loans"
         backLabel="My loans"
@@ -100,7 +100,11 @@ export default async function MyLoanPage({ params }: PageProps<"/my-loans/[id]">
           <>
             <ApplicantCard name={applicantName(loan)} items={applicantRows(loan)} />
             {business && <BusinessCard name={business.name} detail={business.detail} />}
-            <LoanDocuments applicant={applicantDocuments(loan)} business={businessDocuments(loan)} />
+            <LoanDocuments
+              loanForm={loan.documents.loanForm ?? null}
+              applicant={applicantDocuments(loan)}
+              business={businessDocuments(loan)}
+            />
           </>
         }
       />

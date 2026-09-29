@@ -6,8 +6,8 @@ export type TableRowProps = {
   children: ReactNode;
   /** Makes the whole row a link. */
   href?: string;
-  /** `danger` tints the row (overdue installment). */
-  tone?: "default" | "danger";
+  /** `danger` tints the row (overdue installment); `highlight` marks the open month. */
+  tone?: "default" | "danger" | "highlight";
   density?: "comfortable" | "compact" | "dense";
   className?: string;
 };
@@ -18,11 +18,17 @@ const densities = {
   dense: "py-2.75", // schedule preview
 } as const;
 
+const tones = {
+  default: "bg-surface",
+  danger: "bg-danger-tint",
+  highlight: "bg-brand-wash",
+} as const;
+
 export function TableRow({ children, href, tone = "default", density = "comfortable", className }: TableRowProps) {
   const classes = cn(
     "grid grid-cols-(--table-cols) items-center gap-3 border-b border-divider px-5 text-14 text-ink",
     densities[density],
-    tone === "danger" ? "bg-danger-tint" : "bg-surface",
+    tones[tone],
     href && "no-underline transition-colors hover:bg-surface-sunken hover:text-ink",
     className,
   );

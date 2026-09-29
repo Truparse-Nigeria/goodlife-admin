@@ -1,7 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createLoanApi, deletePaymentApi, recordPaymentApi, updateLoanStatusApi } from "@/api/loan";
+import {
+  createLoanApi,
+  deletePaymentApi,
+  generateLoanFormApi,
+  recordPaymentApi,
+  updateLoanStatusApi,
+} from "@/api/loan";
 import { getUsersApi } from "@/api/user";
 import { redirectIfUnauthorized, requireAdmin } from "@/lib/session";
 import type { ActionResult } from "@/types/actions";
@@ -36,13 +42,18 @@ export async function rejectLoan(loanId: string): Promise<ActionResult> {
   return decide(loanId, { status: "Rejected" });
 }
 
-export async function recordPayment(loanId: string, installment: number, payment: IRecordPayment): Promise<ActionResult> {
+export async function recordPayment(loanId: string, payment: IRecordPayment): Promise<ActionResult> {
   if (!(payment.amount > 0)) return { error: "Enter an amount greater than 0." };
-  return mutateLoan(loanId, (token) => recordPaymentApi(token, loanId, installment, payment));
+  return mutateLoan(loanId, (token) => recordPaymentApi(token, loanId, payment));
 }
 
-export async function deletePayment(loanId: string, installment: number, paymentId: string): Promise<ActionResult> {
-  return mutateLoan(loanId, (token) => deletePaymentApi(token, loanId, installment, paymentId));
+export async function deletePayment(loanId: string, paymentId: string): Promise<ActionResult> {
+  return mutateLoan(loanId, (token) => deletePaymentApi(token, loanId, paymentId));
+}
+
+/** Save the prefilled loan form for a loan requested before forms were kept. */
+export async function generateLoanForm(loanId: string): Promise<ActionResult> {
+  return mutateLoan(loanId, (token) => generateLoanFormApi(token, loanId));
 }
 
 /** Submit a loan on a customer's behalf. The API creates the account if the email is new. */

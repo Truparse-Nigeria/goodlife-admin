@@ -16,7 +16,7 @@ export function CardHeader({ title, subtitle, subtitleSize = "md", action, divid
   return (
     <header
       className={cn(
-        "flex items-center justify-between gap-3 px-5 py-4.5",
+        "flex flex-wrap items-center justify-between gap-3 px-5 py-4.5",
         divider && "border-b border-border",
         className,
       )}

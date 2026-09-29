@@ -9,6 +9,7 @@ import type {
   ILoanStats,
   IMyLoanListItem,
   IRecordPayment,
+  IRepaymentSummary,
   IUpdateLoanStatus,
 } from "@/interface/loan.interface";
 import type { IPaginationMeta, IResponse } from "@/types/api";
@@ -53,6 +54,7 @@ export const getLoanApi = async (token: string, id: string) => {
     ...result.data,
     installments: result.data.installments ?? [],
     repayment: result.data.repayment ?? null,
+    lastPaymentId: result.data.lastPaymentId ?? null,
   };
   return { ...result, data };
 };
@@ -66,24 +68,37 @@ export const updateLoanStatusApi = async (token: string, id: string, body: IUpda
   );
 };
 
-type InstallmentResult = { loanStatus: ILoanDetail["status"]; installment: IInstallment };
+type PaymentResult = {
+  loanStatus: ILoanDetail["status"];
+  repayment: IRepaymentSummary;
+  /** The month the payment went to (not returned on removal). */
+  installment?: IInstallment;
+};
 
-const installmentPath = (loanId: string, number: number) =>
-  `/admin/loans/${encodeURIComponent(loanId)}/installments/${number}/payments`;
+const paymentsPath = (loanId: string) => `/admin/loans/${encodeURIComponent(loanId)}/payments`;
 
-/** Admin: record a (possibly partial) payment against one installment. */
-export const recordPaymentApi = async (token: string, loanId: string, number: number, body: IRecordPayment) => {
-  return await callApi<IRecordPayment, InstallmentResult>(installmentPath(loanId, number), HttpMethod.POST, {
+/** Admin: record a payment against the loan's open month. */
+export const recordPaymentApi = async (token: string, loanId: string, body: IRecordPayment) => {
+  return await callApi<IRecordPayment, PaymentResult>(paymentsPath(loanId), HttpMethod.POST, {
     data: body,
     headers: authHeader(token),
   });
 };
 
-/** Admin: remove a mistaken payment. */
-export const deletePaymentApi = async (token: string, loanId: string, number: number, paymentId: string) => {
-  return await callApi<never, InstallmentResult>(
-    `${installmentPath(loanId, number)}/${encodeURIComponent(paymentId)}`,
+/** Admin: undo the loan's most recent payment. */
+export const deletePaymentApi = async (token: string, loanId: string, paymentId: string) => {
+  return await callApi<never, PaymentResult>(
+    `${paymentsPath(loanId)}/${encodeURIComponent(paymentId)}`,
     HttpMethod.DELETE,
+    { headers: authHeader(token) },
+  );
+};
+
+/** Admin: build and save the prefilled loan form for a loan that has none yet. */
+export const generateLoanFormApi = async (token: string, loanId: string) => {
+  return await callApi<never, { loanForm: string }>(
+    `/admin/loans/${encodeURIComponent(loanId)}/loan-form`,
+    HttpMethod.POST,
     { headers: authHeader(token) },
   );
 };

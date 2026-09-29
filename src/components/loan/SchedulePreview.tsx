@@ -15,15 +15,15 @@ export function SchedulePreview({ installments }: SchedulePreviewProps) {
       <TableHead>
         <div>#</div>
         <div>Due date (est.)</div>
-        <div>Principal</div>
+        <div>Principal due</div>
         <div>Interest</div>
-        <div>Installment</div>
+        <div>Amount due</div>
       </TableHead>
       {installments.map((inst) => (
         <TableRow key={inst.number} density="dense" className="tabular-nums">
           <div className="text-muted">{inst.number}</div>
           <div className="text-13">{formatDate(inst.dueDate)}</div>
-          <div>{formatMoney(inst.principal)}</div>
+          <div>{inst.principalDue > 0 ? formatMoney(inst.principalDue) : "—"}</div>
           <div>{formatMoney(inst.interest)}</div>
           <div className="font-semibold">{formatMoney(inst.total)}</div>
         </TableRow>

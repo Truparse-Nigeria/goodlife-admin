@@ -6,6 +6,7 @@ import type { ChangePasswordState, SignInState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { ChangePasswordModal } from "./ChangePasswordModal";
 
 export type LoginFormProps = {
@@ -62,7 +63,7 @@ export function LoginForm({ signInAction, changePasswordAction, initialNotice = 
         </Field>
         <div className="flex flex-col gap-2">
           <Field label="Password">
-            <Input ref={passwordRef} name="password" type="password" autoComplete="current-password" required />
+            <PasswordInput ref={passwordRef} name="password" autoComplete="current-password" required />
           </Field>
           <Link
             href="/forgot-password"

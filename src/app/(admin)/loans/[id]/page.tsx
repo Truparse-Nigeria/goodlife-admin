@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLoanApi } from "@/api/loan";
-import { approveLoan, rejectLoan } from "@/app/actions/loans";
+import { approveLoan, generateLoanForm, rejectLoan } from "@/app/actions/loans";
+import { GenerateLoanFormButton } from "@/components/loan/GenerateLoanFormButton";
 import { ApplicantCard } from "@/components/loan/ApplicantCard";
 import { ApprovalPanel } from "@/components/loan/ApprovalPanel";
 import { BusinessCard } from "@/components/loan/BusinessCard";
@@ -60,7 +61,7 @@ export default async function LoanDetailPage({ params }: PageProps<"/loans/[id]"
 
   return (
     <div className="flex flex-col gap-5">
-      <LoanHeader title={applicantName(loan)} status={loanDisplayStatus(loan.status, loan.installments.some((i) => i.overdue))} subtitle={loanSubtitle(loan)} />
+      <LoanHeader title={applicantName(loan)} status={loanDisplayStatus(loan.status, loan.repayment?.overdue ?? false)} subtitle={loanSubtitle(loan)} />
       <LoanSummaryCard
         metrics={hasSchedule ? repaymentMetrics(loan) : loanMetrics(loan)}
         progress={repaymentProgress(loan)}
@@ -105,7 +106,12 @@ export default async function LoanDetailPage({ params }: PageProps<"/loans/[id]"
               }
             />
             {business && <BusinessCard name={business.name} detail={business.detail} />}
-            <LoanDocuments applicant={applicantDocuments(loan)} business={businessDocuments(loan)} />
+            <LoanDocuments
+              loanForm={loan.documents.loanForm ?? null}
+              missingFormAction={<GenerateLoanFormButton loanId={loan.id} generateAction={generateLoanForm} />}
+              applicant={applicantDocuments(loan)}
+              business={businessDocuments(loan)}
+            />
           </>
         }
       />

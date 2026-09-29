@@ -24,7 +24,7 @@ export type ApprovalPanelProps = {
   rejectAction: RejectLoanAction;
 };
 
-/** Pending loans: set a flat monthly rate, preview the schedule, then approve or reject. */
+/** Pending loans: set a monthly rate, preview the schedule, then approve or reject. */
 export function ApprovalPanel({ loanId, amount, tenureMonths, approveAction, rejectAction }: ApprovalPanelProps) {
   const { toast } = useToast();
   const [rateInput, setRateInput] = useState("");
@@ -36,9 +36,9 @@ export function ApprovalPanel({ loanId, amount, tenureMonths, approveAction, rej
   const repayable = sumTotals(schedule);
 
   const stats = [
-    { label: "Monthly installment", value: valid ? formatMoney(schedule[0].total) : "—" },
+    { label: "Monthly interest", value: valid ? formatMoney(schedule[0].interest) : "—" },
     { label: "Total interest", value: valid ? formatMoney(repayable - amount) : "—" },
-    { label: "Total repayable", value: valid ? formatMoney(repayable) : "—" },
+    { label: "Final payment", value: valid ? formatMoney(schedule[schedule.length - 1].total) : "—" },
   ];
 
   function approve() {
@@ -63,10 +63,10 @@ export function ApprovalPanel({ loanId, amount, tenureMonths, approveAction, rej
         <CardHeader
           className="p-0"
           title="Review and approve"
-          subtitle="Set the monthly interest rate to generate the repayment schedule before approving."
+          subtitle="Interest is charged monthly on the capital. The capital is repaid with the final installment."
         />
         <div className="flex flex-wrap items-end gap-5">
-          <Field label="Interest rate (% per month, flat)">
+          <Field label="Interest rate (% per month)">
             <Input
               type="number"
               inputMode="decimal"

@@ -35,7 +35,7 @@ export function Modal({ open, onClose, title, subtitle, children, className }: M
       onClick={(e) => e.target === ref.current && onClose()}
       aria-labelledby={titleId}
       className={cn(
-        "m-auto w-full max-w-auth rounded-xl border border-border bg-surface p-0 text-ink shadow-elevated backdrop:bg-ink/40",
+        "mx-4 my-auto w-auto max-w-auth rounded-xl sm:mx-auto sm:w-full border border-border bg-surface p-0 text-ink shadow-elevated backdrop:bg-ink/40",
         className,
       )}
     >

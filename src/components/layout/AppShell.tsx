@@ -6,10 +6,10 @@ export type AppShellProps = {
   children: ReactNode;
 };
 
-/** Fixed sidebar + independently scrolling main column. */
+/** Sidebar (a top bar + drawer below `lg`) and an independently scrolling main column. */
 export function AppShell({ sidebar, children }: AppShellProps) {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-dvh flex-col overflow-hidden lg:flex-row">
       {sidebar}
       <main className="min-w-0 flex-1 overflow-auto bg-canvas">
         <Container>{children}</Container>

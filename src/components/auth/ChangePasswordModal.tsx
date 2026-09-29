@@ -5,7 +5,7 @@ import type { ChangePasswordState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/Button";
 import { CardFooter } from "@/components/ui/CardFooter";
 import { Field } from "@/components/ui/Field";
-import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Modal } from "@/components/ui/Modal";
 
 export type ChangePasswordModalProps = {
@@ -37,10 +37,10 @@ export function ChangePasswordModal({ open, currentPassword, changeAction, onClo
         <input type="hidden" name="currentPassword" value={currentPassword} />
         <div className="flex flex-col gap-4 px-6 pt-4 pb-5.5">
           <Field label="New password">
-            <Input name="newPassword" type="password" autoComplete="new-password" minLength={8} required />
+            <PasswordInput name="newPassword" autoComplete="new-password" minLength={8} required />
           </Field>
           <Field label="Confirm new password">
-            <Input name="confirmPassword" type="password" autoComplete="new-password" minLength={8} required />
+            <PasswordInput name="confirmPassword" autoComplete="new-password" minLength={8} required />
           </Field>
           {state?.error && (
             <p role="alert" className="text-13 text-danger">

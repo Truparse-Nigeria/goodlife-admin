@@ -1,29 +1,14 @@
 import type { ISODate } from "./common";
 
-/** One row of a repayment schedule. Derived from a Loan, never stored. */
+/** One month of a planned repayment schedule (before approval). Derived, never stored. */
 export interface Installment {
-  /** 1-based installment number. */
+  /** 1-based month number. */
   number: number;
   dueDate: ISODate;
-  principal: number;
+  /** Capital outstanding that month; interest is charged on it. */
+  capital: number;
   interest: number;
+  /** Capital due that month: all of it in the final month, else 0. */
+  principalDue: number;
   total: number;
-  paidAt: ISODate | null;
-  overdue: boolean;
-}
-
-/** Aggregate repayment position of a loan. Derived, never stored. */
-export interface LoanSummary {
-  /** True once the loan is approved (active or completed). */
-  running: boolean;
-  installments: Installment[];
-  repayable: number;
-  paid: number;
-  balance: number;
-  /** 0–100, rounded. */
-  percentPaid: number;
-  paidCount: number;
-  overdueCount: number;
-  next: Installment | null;
-  monthlyInstallment: number;
 }
