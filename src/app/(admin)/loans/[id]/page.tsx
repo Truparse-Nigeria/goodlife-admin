@@ -66,10 +66,10 @@ export default async function LoanDetailPage({ params }: PageProps<"/loans/[id]"
         metrics={hasSchedule ? repaymentMetrics(loan) : loanMetrics(loan)}
         progress={repaymentProgress(loan)}
       />
+      {hasSchedule && <RepaymentBreakdown loan={loan} />}
       <SplitLayout
         main={
           <>
-            {hasSchedule && <RepaymentBreakdown loan={loan} />}
             {missingSchedule && (
               <Card padding="md">
                 <div className="text-15 font-semibold">No repayment schedule</div>
