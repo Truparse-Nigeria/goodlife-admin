@@ -185,6 +185,12 @@ export interface IRecordPayment {
   period?: number;
 }
 
+/** Body for PATCH /admin/loans/:id/start-date. Moves every due date with it. */
+export interface IUpdateStartDate {
+  /** "YYYY-MM-DD", not in the future. */
+  startDate: string;
+}
+
 /** GET /admin/loans/:id. Dates are ISO timestamps; document values are URLs. */
 export interface ILoanDetail {
   id: string;

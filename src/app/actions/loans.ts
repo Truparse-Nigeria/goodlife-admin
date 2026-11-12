@@ -7,6 +7,7 @@ import {
   generateLoanFormApi,
   recordPaymentApi,
   updateLoanStatusApi,
+  updateStartDateApi,
 } from "@/api/loan";
 import { getUsersApi } from "@/api/user";
 import { redirectIfUnauthorized, requireAdmin } from "@/lib/session";
@@ -45,6 +46,11 @@ export async function rejectLoan(loanId: string): Promise<ActionResult> {
 export async function recordPayment(loanId: string, payment: IRecordPayment): Promise<ActionResult> {
   if (!(payment.amount > 0)) return { error: "Enter an amount greater than 0." };
   return mutateLoan(loanId, (token) => recordPaymentApi(token, loanId, payment));
+}
+
+export async function updateStartDate(loanId: string, startDate: string): Promise<ActionResult> {
+  if (!startDate) return { error: "Pick a start date." };
+  return mutateLoan(loanId, (token) => updateStartDateApi(token, loanId, { startDate }));
 }
 
 export async function deletePayment(loanId: string, paymentId: string): Promise<ActionResult> {

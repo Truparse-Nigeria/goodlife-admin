@@ -1,4 +1,4 @@
-import { recordPayment } from "@/app/actions/loans";
+import { recordPayment, updateStartDate } from "@/app/actions/loans";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { CardHeader } from "@/components/ui/CardHeader";
@@ -7,6 +7,7 @@ import { creditLabel, currentInstallment, scheduleSubtitle } from "@/lib/loan-de
 import { RecordPaymentPanel } from "./RecordPaymentPanel";
 import { RecordPaymentProvider } from "./RecordPaymentProvider";
 import { RepaymentSchedule } from "./RepaymentSchedule";
+import { StartDateEditor } from "./StartDateEditor";
 
 export type RepaymentBreakdownProps = {
   loan: ILoanDetail;
@@ -34,6 +35,9 @@ export function RepaymentBreakdown({ loan, readOnly }: RepaymentBreakdownProps) 
             )
           }
         />
+        {!readOnly && loan.status === "Approved" && loan.startDate && (
+          <StartDateEditor loanId={loan.id} startDate={loan.startDate} updateAction={updateStartDate} />
+        )}
         {canRecord && (
           <RecordPaymentPanel
             loanId={loan.id}

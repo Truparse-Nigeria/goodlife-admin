@@ -11,6 +11,7 @@ import type {
   IRecordPayment,
   IRepaymentSummary,
   IUpdateLoanStatus,
+  IUpdateStartDate,
 } from "@/interface/loan.interface";
 import type { IPaginationMeta, IResponse } from "@/types/api";
 import { API_BASE_URL, authHeader, callApi, HttpMethod } from "./client";
@@ -91,6 +92,15 @@ export const deletePaymentApi = async (token: string, loanId: string, paymentId:
     `${paymentsPath(loanId)}/${encodeURIComponent(paymentId)}`,
     HttpMethod.DELETE,
     { headers: authHeader(token) },
+  );
+};
+
+/** Admin: move an approved loan's start date (and with it every due date). */
+export const updateStartDateApi = async (token: string, loanId: string, body: IUpdateStartDate) => {
+  return await callApi<IUpdateStartDate, Pick<PaymentResult, "loanStatus" | "repayment"> & { startDate: string }>(
+    `/admin/loans/${encodeURIComponent(loanId)}/start-date`,
+    HttpMethod.PATCH,
+    { data: body, headers: authHeader(token) },
   );
 };
 
