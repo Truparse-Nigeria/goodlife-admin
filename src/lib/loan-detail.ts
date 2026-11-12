@@ -118,7 +118,7 @@ export interface InstallmentRow {
   paidNote: string | null;
   /** Under the badge, e.g. "on 1 Jul 2026". */
   paidOn: string | null;
-  /** Payments are recorded against the open month. */
+  /** The open month, or an earlier one that ended unpaid (a payment that was never recorded). */
   canRecord: boolean;
   /** Holds the loan's most recent payment, the only one that can be undone. */
   canUndo: boolean;
@@ -157,7 +157,7 @@ export function installmentRows(loan: ILoanDetail): InstallmentRow[] {
       dueNote: dueNoteOf(installment),
       paidNote: paidNoteOf(installment),
       paidOn: lastPayment ? `on ${date(lastPayment.paidAt)}` : null,
-      canRecord: acceptsPayments && installment.isCurrent,
+      canRecord: acceptsPayments && (installment.isCurrent || installment.overdue),
       canUndo: undoable && installment.payments.some((p) => p.id === loan.lastPaymentId),
     };
   });

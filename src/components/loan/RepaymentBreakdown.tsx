@@ -17,7 +17,6 @@ export type RepaymentBreakdownProps = {
 export function RepaymentBreakdown({ loan, readOnly }: RepaymentBreakdownProps) {
   const credit = creditLabel(loan);
   const month = currentInstallment(loan);
-  const next = month ? (loan.installments.find((i) => i.number === month.number + 1) ?? null) : null;
   const canRecord = !readOnly && loan.status === "Approved" && month != null;
 
   return (
@@ -38,8 +37,7 @@ export function RepaymentBreakdown({ loan, readOnly }: RepaymentBreakdownProps) 
         {canRecord && (
           <RecordPaymentPanel
             loanId={loan.id}
-            month={month}
-            next={next}
+            installments={loan.installments}
             ratePerMonth={loan.interestPerMonth ?? 0}
             recordAction={recordPayment}
           />

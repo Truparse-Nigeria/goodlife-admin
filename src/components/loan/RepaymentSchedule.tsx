@@ -75,7 +75,7 @@ export function RepaymentSchedule({ loan, readOnly = false }: RepaymentScheduleP
             </div>
             {!readOnly && (
               <div className="flex flex-col items-end gap-1">
-                {canRecord && <RecordPaymentButton />}
+                {canRecord && <RecordPaymentButton period={i.number} />}
                 {canUndo && lastPayment && (
                   <UndoPaymentButton
                     loanId={loan.id}

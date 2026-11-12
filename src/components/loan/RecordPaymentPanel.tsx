@@ -15,13 +15,18 @@ import { useRecordPayment } from "./RecordPaymentProvider";
 
 export type RecordPaymentPanelProps = {
   loanId: string;
-  /** The open month the payment goes to. */
-  month: IInstallment;
-  /** The month after it, if any (for the carry-forward preview). */
-  next: IInstallment | null;
+  /** The schedule; the panel picks the month it was opened for (and the one after it). */
+  installments: IInstallment[];
   /** % of capital per month, for the reduce-capital preview. */
   ratePerMonth: number;
   recordAction: RecordPaymentAction;
+};
+
+type PaymentFormProps = Omit<RecordPaymentPanelProps, "installments"> & {
+  /** The month the payment goes to: the open month, or an earlier one that ended unpaid. */
+  month: IInstallment;
+  /** The month after it, if any (for the carry-forward preview). */
+  next: IInstallment | null;
 };
 
 const METHOD_OPTIONS = PAYMENT_METHODS.map((m) => ({ value: m, label: m }));
@@ -48,14 +53,17 @@ function capitalDescription(excess: number, capital: number, rate: number): stri
  * month. Short payments part-pay the month; over-payments are carried to
  * next month or used to reduce capital, as the admin chooses.
  */
-export function RecordPaymentPanel(props: RecordPaymentPanelProps) {
-  const { open } = useRecordPayment();
+export function RecordPaymentPanel({ installments, ...props }: RecordPaymentPanelProps) {
+  const { period } = useRecordPayment();
+  const month = period == null ? null : installments.find((i) => i.number === period);
+  if (!month) return null;
+  const next = installments.find((i) => i.number === month.number + 1) ?? null;
   // Mounted only while open, so every opening starts with a fresh form.
-  return open ? <PaymentForm {...props} /> : null;
+  return <PaymentForm key={month.number} month={month} next={next} {...props} />;
 }
 
-function PaymentForm({ loanId, month, next, ratePerMonth, recordAction }: RecordPaymentPanelProps) {
-  const { setOpen } = useRecordPayment();
+function PaymentForm({ loanId, month, next, ratePerMonth, recordAction }: PaymentFormProps) {
+  const { close } = useRecordPayment();
   const { toast } = useToast();
   const [pending, startTransition] = useTransition();
   const ref = useRef<HTMLFormElement>(null);
@@ -91,7 +99,7 @@ function PaymentForm({ loanId, month, next, ratePerMonth, recordAction }: Record
       });
       if (error) return toast(error);
       toast(`Payment of ${formatMoney(value)} recorded for month ${month.number}`);
-      setOpen(false);
+      close();
     });
   }
 
@@ -160,9 +168,11 @@ function PaymentForm({ loanId, month, next, ratePerMonth, recordAction }: Record
       {isShort && (
         <p className="text-13 text-warning">
           Short by {formatMoney(-excess)}.{" "}
-          {isFinal
-            ? "If the capital isn’t fully repaid by the due date, what’s left rolls into a new month with interest."
-            : "Whatever is still unpaid when the month ends is added to next month’s amount due as arrears."}
+          {month.overdue
+            ? "This month has already ended, so whatever is still unpaid stays as arrears on the open month."
+            : isFinal
+              ? "If the capital isn’t fully repaid by the due date, what’s left rolls into a new month with interest."
+              : "Whatever is still unpaid when the month ends is added to next month’s amount due as arrears."}
         </p>
       )}
       {finalExcess && (
@@ -172,7 +182,7 @@ function PaymentForm({ loanId, month, next, ratePerMonth, recordAction }: Record
       )}
 
       <div className="flex justify-end gap-2">
-        <Button variant="secondary" size="md" onClick={() => setOpen(false)} disabled={pending}>
+        <Button variant="secondary" size="md" onClick={close} disabled={pending}>
           Cancel
         </Button>
         <Button type="submit" size="md" disabled={pending}>
